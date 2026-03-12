@@ -3,8 +3,27 @@ pkgs.mkShell {
   nativeBuildInputs = with pkgs; [
     vulkan-validation-layers
     
+    alsa-lib
+    libdecor
+    libusb1
+    libxkbcommon
+    vulkan-loader
+    wayland
+    libX11
+    libX11.dev
+    libXext
+    libXi
+    udev
+
+    libxcursor
+    libxrandr
+    libxscrnsaver
+    libxcb
+    libxtst
+
     cmake
     ninja
+    doxygen
   ];
 
   LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath (with pkgs; [
@@ -19,6 +38,8 @@ pkgs.mkShell {
     libXext
     libXi
     udev
+
+    SDL2
   ]);
 
   shellHook = ''
