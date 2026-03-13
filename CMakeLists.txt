@@ -22,7 +22,21 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIGURATION>")
 add_subdirectory(vendored/SDL EXCLUDE_FROM_ALL)
 
 # Create your game executable target as usual
-add_executable(game WIN32 main/main.cpp)
+add_executable(game WIN32)
+
+target_sources(game
+PRIVATE
+  main/main.cpp
+  main/classes.cpp
+
+PUBLIC
+  FILE_SET include_headers
+  TYPE HEADERS
+  BASE_DIRS
+    main/include
+  FILES
+    main/include/classes.hpp
+)
 
 # Link to the actual SDL3 library.
 target_link_libraries(game PRIVATE SDL3::SDL3)
