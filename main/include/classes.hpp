@@ -17,6 +17,7 @@
 #include <SDL3/SDL_video.h>
 #include <SDL3/SDL_init.h>
 #include <SDL3/SDL_render.h>
+#include <SDL3_ttf/SDL_ttf.h>
 
 #include <map>
 #include <utility>
@@ -81,14 +82,13 @@ typedef std::map<std::pair<int, int>, Pixel> PixelMap;
 ///////////////////////////////////////////////////////////////////////////////
 class World {
   static World* instance; ///< Poiner to the one existing instance of the world.
-
   SDL_Window* window; ///< SDL window.
   SDL_Renderer* renderer; ///< SDL renderer.
   SDL_Texture* texture; ///< SDL texture.
+  TTF_Font* font; ///< Fonts that are used for the text on the screen.
   Vector2 window_size; ///< Window width and height in pixels devided by PIXEL_SIZE.
   PixelMap pixel_map; ///< PixelMap what contains all phical object pixels.
-
-  SDL_Color bg_color; ///< Background color of the screen
+  SDL_Color bg_color; ///< Background color of the screen.
 
   /////////////////////////////////////////////////////////////////////////////
   /// Class constructor, here we define World::bg_color and
@@ -198,7 +198,7 @@ class World {
   /// @note Took this as a refference:
   /// - https://stackoverflow.com/questions/1500064/renaming-first-and-second-of-a-map-iterator
   /// - https://stackoverflow.com/questions/32590764/can-i-use-stdpair-but-rename-first-and-second-member-names
-  /// @todo Make sand fall under water.
+  /// @todo Make sand fall under water and water lift above the snad.
   /////////////////////////////////////////////////////////////////////////////
   void recalcWorld();
 
@@ -207,18 +207,13 @@ class World {
   /////////////////////////////////////////////////////////////////////////////
   void addPixel();
 
-  /////////////////////////////////////////////////////////////////////////////
-  /// Complitely erases pixel_map.
-  /////////////////////////////////////////////////////////////////////////////
-  void clearWorld();
-
 public:
   bool mouse_is_down = false; ///< Stores current state of the mouse button, used in redrawWorld() to detect then addPixel() should be inwoked.
   PixelType selected_pixel_type; ///< Currently selected PixelType, used in addPixel().
 
   ~World();
   
-  /// Remove copy constructor
+  /// Remove copy constructor.
   World(const World& obj) = delete;
 
   /////////////////////////////////////////////////////////////////////////////
@@ -236,7 +231,12 @@ public:
   }
 
   /////////////////////////////////////////////////////////////////////////////
-  /// Function what defines World::window and World::texture.
+  /// Complitely clears pixel_map.
+  /////////////////////////////////////////////////////////////////////////////
+  void clearWorld();
+
+  /////////////////////////////////////////////////////////////////////////////
+  /// Function what defines World::window, World::texture and World::font.
   ///
   /// @returns SDL_APP_CONTINUE on success
   /// @returns SDL_APP_FAILURE on error
@@ -259,7 +259,8 @@ public:
   ///   :Call addPixel();
   /// else (false)
   /// endif
-  /// :Redraw World::texture and then renderer;
+  /// :Redraw pixels on World::texture and render;
+  /// :Inline text render;
   /// @enduml
   ///
   /// @callgraph

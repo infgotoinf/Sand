@@ -10,6 +10,7 @@
 /// All rights reserved.\n
 /// This file is under the MIT License (MIT)
 ///////////////////////////////////////////////////////////////////////////////
+#include "SDL3/SDL_keycode.h"
 #define SDL_MAIN_USE_CALLBACKS 1  /* use the callbacks instead of main() */
 #include <SDL3/SDL_main.h>
 #include <SDL3/SDL.h>
@@ -44,6 +45,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 /// - Handles switching World::mouse_is_down between true and false.
 /// - Handles switching World::selected_pixel_type between SAND and WATER
 /// PixelType.
+/// - Hendles inwoking of World::clearWorld().
 ///////////////////////////////////////////////////////////////////////////////
 SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 {
@@ -64,6 +66,8 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
             world->selected_pixel_type = SAND;
         if (event->key.key == SDLK_2)
             world->selected_pixel_type = WATER;
+        if (event->key.key == SDLK_0)
+            world->clearWorld();
             
     }
     return SDL_APP_CONTINUE;  /* carry on with the program! */

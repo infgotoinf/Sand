@@ -3,6 +3,7 @@ project(Sand)
 
 # To use std::map<>.contains()
 set (CMAKE_CXX_STANDARD 20)
+set (CMAKE_CXX_STANDARD_REQUIRED true)
 
 # This chunk of code exists to make my clangd LSP in Helix work with SDL3
 # https://mzhang.io/posts/2022-03-03-clangd-in-nix/
@@ -22,6 +23,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIGURATION>")
 
 # This assumes the SDL source is available in vendored/SDL
 add_subdirectory(vendored/SDL EXCLUDE_FROM_ALL)
+add_subdirectory(vendored/SDL3_ttf EXCLUDE_FROM_ALL)
 
 # Create your game executable target as usual
 add_executable(game WIN32)
@@ -41,4 +43,4 @@ PUBLIC
 )
 
 # Link to the actual SDL3 library.
-target_link_libraries(game PRIVATE SDL3::SDL3)
+target_link_libraries(game PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf)

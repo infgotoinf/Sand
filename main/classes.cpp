@@ -8,11 +8,17 @@
 /// @copyright Copyright (c) 2026 -inf (@infgotoinf) v. DemDanEm (@DemDanEm).
 /// All rights reserved.\n
 /// This file is under the MIT License (MIT)
+/// @bug It takes a few seconds for the game process to die on quit signal.
+/// This bug occured after adding text rendering implementation in
+/// World::redrawWorld().
 ///////////////////////////////////////////////////////////////////////////////
 #include "include/classes.hpp"
-#include "SDL3/SDL_stdinc.h"
+#include "SDL3/SDL_init.h"
+#include "SDL3/SDL_render.h"
 
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_main.h>
+#include <SDL3_ttf/SDL_ttf.h>
 
 #include <utility>
 
@@ -24,7 +30,7 @@
 /// Defines how off the mouse cursor's coordinates pixels can spawn.
 #define BRUSH_SPREAD 3
 
-/// Defines with how off the default color pixel color can be
+/// Defines with how off the default color pixel color can be.
 #define COLOR_SPREAD 100
 
 #define SAND_COLOR (SDL_Color) { (Uint8) (255) \
@@ -35,6 +41,9 @@
                                 , (Uint8) (0) \
                                 , (Uint8) (255 - SDL_rand(COLOR_SPREAD)), 255 }
 
+/// Defines size of the text that is drawn on the screen.
+#define TEXT_SIZE 16
+
 
 
 World::World() {
@@ -44,11 +53,17 @@ World::World() {
 
 World::~World() {
     SDL_DestroyTexture(texture);
+    TTF_Quit();
+}
+
+
+void World::clearWorld() {
+    pixel_map.clear();
 }
 
 
 SDL_AppResult World::initWorld() {
-    SDL_SetAppMetadata("Example Renderer Clear", "0.5", NULL);
+    SDL_SetAppMetadata("Sand the sandbox", "1", NULL);
 
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         SDL_Log("Couldn't initialize SDL: %s", SDL_GetError());
@@ -70,12 +85,19 @@ SDL_AppResult World::initWorld() {
         return SDL_APP_FAILURE;
     }
 
+    if (!TTF_Init()) {
+        SDL_Log("Couldn't initialize TTF: %s", SDL_GetError());
+        return SDL_APP_FAILURE;
+    }
+
+    font = TTF_OpenFont("vendored/UnifontExMono.ttf", TEXT_SIZE * 2);
+    if (!font) {
+        SDL_Log("Couldn't load font: %s", SDL_GetError());
+        TTF_Quit();
+        return SDL_APP_FAILURE;
+    }
+
     return SDL_APP_CONTINUE;  /* carry on with the program! */
-}
-
-
-void World::clearWorld() {
-  
 }
 
 
@@ -204,7 +226,7 @@ SDL_AppResult World::redrawWorld()
         addPixel();
     }
 
-    // Redraw the world
+    // Redraw pixel_map on the screen
     SDL_FRect dst_rect;
     SDL_Surface *surface = NULL;
 
@@ -232,6 +254,29 @@ SDL_AppResult World::redrawWorld()
     dst_rect.w = window_size.x;
     dst_rect.h = window_size.y;
     SDL_RenderTexture(renderer, texture, NULL, &dst_rect);
+
+    // TTF_RenderText_Solid ignores \n
+    static const char* text[4] = {"LMB - to start drawing pixels"
+                                , "1 - to select Sand"
+                                , "2 - to select Water"
+                                , "0 - to clean the screen"};
+
+    int counter = 1;
+    for (const char* phrase : text)
+    {
+        dst_rect.w = strlen(phrase) * (int)(TEXT_SIZE / 2);
+        dst_rect.h = TEXT_SIZE;
+        dst_rect.x = TEXT_SIZE;
+        dst_rect.y = TEXT_SIZE * counter;
+        ++counter;
+        // Inline creation of surface from text and convertation it to texture and then render
+        SDL_RenderTexture(renderer
+                         , SDL_CreateTextureFromSurface(renderer
+                                                       , TTF_RenderText_Solid(font, phrase, 0
+                                                                             , SDL_Color { 255, 255, 255, 255 }))
+                         , NULL, &dst_rect);
+    }
+
 
     SDL_RenderPresent(renderer);
 

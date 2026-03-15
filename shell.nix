@@ -23,6 +23,8 @@ pkgs.mkShell {
 
     cmake
     ninja
+    freetype
+    
     doxygen
     graphviz
     plantuml
