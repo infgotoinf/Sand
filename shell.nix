@@ -24,6 +24,9 @@ pkgs.mkShell {
     cmake
     ninja
     doxygen
+    graphviz
+    plantuml
+    jdk
   ];
 
   LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath (with pkgs; [

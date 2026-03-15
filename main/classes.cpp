@@ -1,22 +1,30 @@
-/// @brief Header with all classes 
+///////////////////////////////////////////////////////////////////////////////
+/// File with implementation of all World functions.
+///
+/// @ref Defined in include/classes.hpp
+///
+/// @file
+/// @date 2026/03/15
+/// @copyright Copyright (c) 2026 -inf (@infgotoinf) v. DemDanEm (@DemDanEm).
+/// All rights reserved.\n
+/// This file is under the MIT License (MIT)
+///////////////////////////////////////////////////////////////////////////////
 #include "include/classes.hpp"
-
-#include "SDL3/SDL_log.h"
-#include "SDL3/SDL_mouse.h"
-#include "SDL3/SDL_pixels.h"
-#include "SDL3/SDL_render.h"
-#include "SDL3/SDL_init.h"
 #include "SDL3/SDL_stdinc.h"
-#include "SDL3/SDL_surface.h"
-#include "SDL3/SDL_video.h"
+
+#include <SDL3/SDL.h>
 
 #include <utility>
 
-/// @brief Defines pixel size in pixels
-#define PIXEL_SIZE 5
-/// @brief Deines how off the mouse cursor pixels can be
-#define BRUSH_SPREAD 5
 
+/// Defines pixel size in pixels.
+/// Makes pixel that much bigger than a regular pixel on the screen.
+#define PIXEL_SIZE 5
+
+/// Defines how off the mouse cursor's coordinates pixels can spawn.
+#define BRUSH_SPREAD 3
+
+/// Defines with how off the default color pixel color can be
 #define COLOR_SPREAD 100
 
 #define SAND_COLOR (SDL_Color) { (Uint8) (255) \
@@ -26,7 +34,8 @@
 #define WATER_COLOR (SDL_Color) { (Uint8) (0) \
                                 , (Uint8) (0) \
                                 , (Uint8) (255 - SDL_rand(COLOR_SPREAD)), 255 }
-                               
+
+
 
 World::World() {
     bg_color = {0, 0, 0, 255};
@@ -53,7 +62,6 @@ SDL_AppResult World::initWorld() {
         SDL_Log("Couldn't create window/renderer: %s", SDL_GetError());
         return SDL_APP_FAILURE;
     }
-    // SDL_SetRenderLogicalPresentation(renderer, 640, 480, SDL_LOGICAL_PRESENTATION_LETTERBOX);
 
     texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING
                               , initial_window_size.x, initial_window_size.y);
@@ -75,8 +83,8 @@ void World::addPixel() {
     float mouse_x, mouse_y;
     SDL_GetMouseState(&mouse_x, &mouse_y);
 
-    Vector2 mouse_pos = { (int)mouse_x / PIXEL_SIZE + (SDL_rand(BRUSH_SPREAD) + 1) - BRUSH_SPREAD / 2
-                        , (int)mouse_y / PIXEL_SIZE + (SDL_rand(BRUSH_SPREAD) + 1) - BRUSH_SPREAD / 2};
+    Vector2 mouse_pos = { (int)mouse_x / PIXEL_SIZE + (SDL_rand(BRUSH_SPREAD) * (SDL_rand(2) ? -1 : 1))
+                        , (int)mouse_y / PIXEL_SIZE + (SDL_rand(BRUSH_SPREAD) * (SDL_rand(2) ? -1 : 1))};
 
     // Fix pixel pos if it's off the screen
     if (mouse_pos.x > window_size.x) mouse_pos.x = window_size.x;
@@ -91,6 +99,7 @@ void World::addPixel() {
         pixel_map.insert({ { mouse_pos.x, mouse_pos.y }, Pixel{ color, selected_pixel_type } });
     }
 }
+
 
 
 bool World::checkIfCanMove(Vector2 pos, PixelMap *new_pixel_map)
@@ -169,7 +178,8 @@ void World::recalcWorld() {
 }
 
 
-SDL_AppResult World::redrawWorld() {
+SDL_AppResult World::redrawWorld()
+{    
     // Check if window size has changed
     Vector2 current_window_size;
     if (!SDL_GetWindowSizeInPixels(window, &current_window_size.x, &current_window_size.y)) {
@@ -178,7 +188,7 @@ SDL_AppResult World::redrawWorld() {
     }
     if (window_size != current_window_size)
     {
-        // Update window_size to match actual window size
+        // Update window_size and texture to match actual window size
         window_size = current_window_size;
         texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING
                                   , window_size.x, window_size.y);
@@ -188,10 +198,8 @@ SDL_AppResult World::redrawWorld() {
         }
     }
 
-    // Calculate pixel movement
     recalcWorld();
 
-    // Add pixes if mouse is down
     if (mouse_is_down) {
         addPixel();
     }
@@ -200,12 +208,14 @@ SDL_AppResult World::redrawWorld() {
     SDL_FRect dst_rect;
     SDL_Surface *surface = NULL;
 
-    if (SDL_LockTextureToSurface(texture, NULL, &surface)) {
-        SDL_Rect r;
+    if (SDL_LockTextureToSurface(texture, NULL, &surface))
+    {
         // Draw black bg
         SDL_FillSurfaceRect(surface, NULL, SDL_MapRGB(SDL_GetPixelFormatDetails(surface->format), NULL
                            , 0, 0, 0));
-        // Draw all pixels
+
+        // Draw all pixels from pixel_map
+        SDL_Rect r;
         for (auto & [ pos, pixel ] : pixel_map)
         {
             auto & [pos_x, pos_y] = pos;
@@ -215,7 +225,7 @@ SDL_AppResult World::redrawWorld() {
             SDL_FillSurfaceRect(surface, &r, SDL_MapRGB(SDL_GetPixelFormatDetails(surface->format), NULL
                                , pixel.color.r, pixel.color.g, pixel.color.b));
         }
-        SDL_UnlockTexture(texture);  /* upload the changes (and frees the temporary surface)! */
+        SDL_UnlockTexture(texture);
     }
 
     dst_rect.x = dst_rect.y = 0;
@@ -223,8 +233,7 @@ SDL_AppResult World::redrawWorld() {
     dst_rect.h = window_size.y;
     SDL_RenderTexture(renderer, texture, NULL, &dst_rect);
 
-    /* put the newly-cleared rendering on the screen. */
     SDL_RenderPresent(renderer);
 
-    return SDL_APP_CONTINUE;  /* carry on with the program! */
+    return SDL_APP_CONTINUE;
 }
