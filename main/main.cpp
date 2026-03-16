@@ -1,64 +1,108 @@
+///////////////////////////////////////////////////////////////////////////////
+/// Main file of the game, glues everything together.
+///
+/// @ref Uses classes and functions defined in include/classes.hpp
+///
+/// @file
+/// @date 2026/03/15
+/// @copyright Copyright (c) 2026 -inf (@infgotoinf) v. DemDanEm (@DemDanEm).
+/// All rights reserved.
+/// All rights reserved.\n
+/// This file is under the MIT License (MIT)
+///////////////////////////////////////////////////////////////////////////////
+#include "SDL3/SDL_keycode.h"
 #define SDL_MAIN_USE_CALLBACKS 1  /* use the callbacks instead of main() */
-#include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
+#include <SDL3/SDL.h>
 
-/* We will use this renderer to draw into this window every frame. */
-static SDL_Window *window = NULL;
-static SDL_Renderer *renderer = NULL;
+#include "include/classes.hpp"
 
 
-/* This function runs once at startup. */
+/// Defines how many times per second game will be updated.
+#define FPS 200
+
+/// Defines how many miliseconds should be waited to update.
+#define BETWEEN_FRAME_INTERVAL (1000 / FPS)
+
+
+World* World::instance = nullptr;
+
+static World* world = World::getIstance(); ///< World class instance
+
+
+///////////////////////////////////////////////////////////////////////////////
+/// This function runs once at startup. Calls World::initWorld().
+///////////////////////////////////////////////////////////////////////////////
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 {
-    SDL_SetAppMetadata("Example Renderer Clear", "1.0", "com.example.renderer-clear");
-
-    if (!SDL_Init(SDL_INIT_VIDEO)) {
-        SDL_Log("Couldn't initialize SDL: %s", SDL_GetError());
-        return SDL_APP_FAILURE;
-    }
-
-    if (!SDL_CreateWindowAndRenderer("Sandbox", 640, 480, SDL_WINDOW_RESIZABLE, &window, &renderer)) {
-        SDL_Log("Couldn't create window/renderer: %s", SDL_GetError());
-        return SDL_APP_FAILURE;
-    }
-    SDL_SetRenderLogicalPresentation(renderer, 640, 480, SDL_LOGICAL_PRESENTATION_LETTERBOX);
-
-    return SDL_APP_CONTINUE;  /* carry on with the program! */
+    return world->initWorld();
 }
 
 
-/* This function runs when a new event (mouse input, keypresses, etc) occurs. */
+///////////////////////////////////////////////////////////////////////////////
+/// This function runs when a new event occurs.
+///
+/// - Handles switching World::mouse_is_down between true and false.
+/// - Handles switching World::selected_pixel_type between SAND and WATER
+/// PixelType.
+/// - Hendles inwoking of World::clearWorld().
+///////////////////////////////////////////////////////////////////////////////
 SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 {
-    if (event->type == SDL_EVENT_QUIT) {
+    switch (event->type) {
+    case SDL_EVENT_QUIT:
         return SDL_APP_SUCCESS;  /* end the program, reporting success to the OS. */
+    // Check if mouse is pressed of no
+    case SDL_EVENT_MOUSE_BUTTON_DOWN:
+        world->mouse_is_down = true;
+        break;
+    case SDL_EVENT_MOUSE_BUTTON_UP:
+        world->mouse_is_down = false;
+        break;
+
+    // Do some action if key on a keyboard is pressed
+    case SDL_EVENT_KEY_DOWN:
+        if (event->key.key == SDLK_1)
+            world->selected_pixel_type = SAND;
+        if (event->key.key == SDLK_2)
+            world->selected_pixel_type = WATER;
+        if (event->key.key == SDLK_0)
+            world->clearWorld();
+            
     }
     return SDL_APP_CONTINUE;  /* carry on with the program! */
 }
 
 
-/* This function runs once per frame, and is the heart of the program. */
+///////////////////////////////////////////////////////////////////////////////
+/// This function runs each frame. Calls World::redrawWorld() each time
+/// #BETWEEN_FRAME_INTERVAL passes.
+///////////////////////////////////////////////////////////////////////////////
 SDL_AppResult SDL_AppIterate(void *appstate)
 {
-    const double now = ((double)SDL_GetTicks()) / 1000.0;  /* convert from milliseconds to seconds. */
-    /* choose the color for the frame we will draw. The sine wave trick makes it fade between colors smoothly. */
-    const float red = (float) (0.5 + 0.5 * SDL_sin(now));
-    const float green = (float) (0.5 + 0.5 * SDL_sin(now + SDL_PI_D * 2 / 3));
-    const float blue = (float) (0.5 + 0.5 * SDL_sin(now + SDL_PI_D * 4 / 3));
-    SDL_SetRenderDrawColorFloat(renderer, red, green, blue, SDL_ALPHA_OPAQUE_FLOAT);  /* new color, full alpha. */
-
-    /* clear the window to the draw color. */
-    SDL_RenderClear(renderer);
-
-    /* put the newly-cleared rendering on the screen. */
-    SDL_RenderPresent(renderer);
-
-    return SDL_APP_CONTINUE;  /* carry on with the program! */
+    static Uint64 now = 0;
+    if (SDL_GetTicks() > now) {
+        now += BETWEEN_FRAME_INTERVAL;
+        return world->redrawWorld();
+    }
+    return SDL_APP_CONTINUE;
 }
 
 
-/* This function runs once at shutdown. */
+///////////////////////////////////////////////////////////////////////////////
+/// This function runs on showdown.
+///////////////////////////////////////////////////////////////////////////////
 void SDL_AppQuit(void *appstate, SDL_AppResult result)
 {
     /* SDL will clean up the window/renderer for us. */
 }
+
+///////////////////////////////////////////////////////////////////////////////
+/// @mainpage Sand the sandbox game
+/// @section links_sec Links
+/// @subsection files_sec Files
+/// @ref classes.cpp main.cpp classes.hpp
+/// @subsection github_sec Github
+/// https://github.com/infgotoinf/Sand \n
+/// https://github.com/infgotoinf/Sand/wiki/О-проекте#основная-информация
+///////////////////////////////////////////////////////////////////////////////

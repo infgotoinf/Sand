@@ -23,7 +23,12 @@ pkgs.mkShell {
 
     cmake
     ninja
+    freetype
+    
     doxygen
+    graphviz
+    plantuml
+    jdk
   ];
 
   LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath (with pkgs; [
