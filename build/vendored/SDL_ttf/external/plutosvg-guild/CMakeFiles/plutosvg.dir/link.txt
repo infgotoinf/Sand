@@ -1,0 +1,2 @@
+/ucrt64/bin/ar.exe qc libplutosvg.a CMakeFiles/plutosvg.dir/source/plutosvg.c.o
+/ucrt64/bin/ranlib.exe libplutosvg.a

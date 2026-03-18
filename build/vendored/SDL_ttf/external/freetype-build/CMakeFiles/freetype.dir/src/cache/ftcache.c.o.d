@@ -1,0 +1,76 @@
+vendored/SDL_ttf/external/freetype-build/CMakeFiles/freetype.dir/src/cache/ftcache.c.o: \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/src/cache/ftcache.c \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/src/cache/ftcbasic.c \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/include/freetype/internal/ftobjs.h \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/include/freetype/ftrender.h \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/include/freetype/ftmodapi.h \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/include/freetype/freetype.h \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/include/ft2build.h \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/include/freetype/config/ftheader.h \
+ C:/msys64/home/studentcoll/Sand/build/vendored/SDL_ttf/external/freetype-build/include/freetype/config/ftconfig.h \
+ C:/msys64/home/studentcoll/Sand/build/vendored/SDL_ttf/external/freetype-build/include/freetype/config/ftoption.h \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/include/freetype/config/ftstdlib.h \
+ C:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/stddef.h \
+ C:/msys64/ucrt64/include/stddef.h C:/msys64/ucrt64/include/crtdefs.h \
+ C:/msys64/ucrt64/include/corecrt.h C:/msys64/ucrt64/include/_mingw.h \
+ C:/msys64/ucrt64/include/_mingw_mac.h \
+ C:/msys64/ucrt64/include/_mingw_secapi.h \
+ C:/msys64/ucrt64/include/vadefs.h \
+ C:/msys64/ucrt64/include/sdks/_mingw_ddk.h \
+ C:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/limits.h \
+ C:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/syslimits.h \
+ C:/msys64/ucrt64/include/limits.h C:/msys64/ucrt64/include/string.h \
+ C:/msys64/ucrt64/include/sec_api/string_s.h \
+ C:/msys64/ucrt64/include/stdio.h \
+ C:/msys64/ucrt64/include/corecrt_stdio_config.h \
+ C:/msys64/ucrt64/include/_mingw_off_t.h \
+ C:/msys64/ucrt64/include/swprintf.inl \
+ C:/msys64/ucrt64/include/sec_api/stdio_s.h \
+ C:/msys64/ucrt64/include/stdlib.h \
+ C:/msys64/ucrt64/include/corecrt_wstdlib.h \
+ C:/msys64/ucrt64/include/sec_api/stdlib_s.h \
+ C:/msys64/ucrt64/include/malloc.h \
+ C:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/mm_malloc.h \
+ C:/msys64/ucrt64/include/errno.h C:/msys64/ucrt64/include/setjmp.h \
+ C:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/stdarg.h \
+ C:/msys64/ucrt64/include/stdarg.h \
+ C:/msys64/ucrt64/include/_mingw_stdarg.h \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/include/freetype/config/integer-types.h \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/include/freetype/config/public-macros.h \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/include/freetype/config/mac-support.h \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/include/freetype/fttypes.h \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/include/freetype/ftsystem.h \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/include/freetype/ftimage.h \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/include/freetype/fterrors.h \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/include/freetype/ftmoderr.h \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/include/freetype/fterrdef.h \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/include/freetype/ftglyph.h \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/include/freetype/ftsizes.h \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/include/freetype/ftlcdfil.h \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/include/freetype/ftparams.h \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/include/freetype/internal/ftmemory.h \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/include/freetype/internal/compiler-macros.h \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/include/freetype/internal/ftgloadr.h \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/include/freetype/internal/ftdrv.h \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/include/freetype/internal/autohint.h \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/include/freetype/internal/ftserv.h \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/include/freetype/internal/ftcalc.h \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/include/freetype/ftincrem.h \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/include/freetype/internal/ftdebug.h \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/include/freetype/ftcache.h \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/src/cache/ftcglyph.h \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/src/cache/ftcmanag.h \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/src/cache/ftcmru.h \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/include/freetype/internal/compiler-macros.h \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/src/cache/ftccache.h \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/src/cache/ftcimage.h \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/src/cache/ftcsbits.h \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/src/cache/ftccback.h \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/src/cache/ftcerror.h \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/src/cache/ftccache.c \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/src/cache/ftccmap.c \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/src/cache/ftcglyph.c \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/src/cache/ftcimage.c \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/src/cache/ftcmanag.c \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/src/cache/ftcmru.c \
+ C:/msys64/home/studentcoll/Sand/vendored/SDL_ttf/external/freetype/src/cache/ftcsbits.c

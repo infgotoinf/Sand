@@ -1,0 +1,1 @@
+/ucrt64/bin/c++.exe -Wl,--enable-auto-import -mwindows CMakeFiles/game.dir/main/main.cpp.o CMakeFiles/game.dir/main/classes.cpp.o -o game.exe -Wl,--out-implib,libgame.dll.a -Wl,--major-image-version,0,--minor-image-version,0  vendored/SDL_ttf/libSDL3_ttf.dll.a vendored/SDL/libSDL3.dll.a

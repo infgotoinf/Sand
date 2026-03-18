@@ -1,0 +1,2 @@
+/ucrt64/bin/ar.exe qc libharfbuzz.a CMakeFiles/harfbuzz.dir/src/harfbuzz.cc.o
+/ucrt64/bin/ranlib.exe libharfbuzz.a
