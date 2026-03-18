@@ -18,6 +18,7 @@
 #include <SDL3/SDL_render.h>
 #include <SDL3_ttf/SDL_ttf.h>
 
+#include <cstdint>
 #include <map>
 #include <utility>
 
