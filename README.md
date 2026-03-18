@@ -6,15 +6,19 @@
 ```shell
 nix-shell
 ```
-1: Generate config
+1: Install git modules
+```shell
+git submodule update --init --recursive
+```
+2: Generate config
 ```shell
 cmake -S . -B build
 ```
-2: Build executable
+3: Build executable
 ```shell
 cmake --build build
 ```
-3: Run it
+4: Run it
 ```shell
 build/sand
 ```
