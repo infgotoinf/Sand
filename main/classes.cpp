@@ -262,20 +262,31 @@ SDL_AppResult World::redrawWorld()
                                 , "0 - to clean the screen"};
 
     int counter = 1;
-    for (const char* phrase : text)
+    if (SDL_LockTextureToSurface(texture, NULL, &surface))
     {
-        dst_rect.w = strlen(phrase) * (int)(TEXT_SIZE / 2);
-        dst_rect.h = TEXT_SIZE;
-        dst_rect.x = TEXT_SIZE;
-        dst_rect.y = TEXT_SIZE * counter;
-        ++counter;
-        // Inline creation of surface from text and convertation it to texture and then render
-        SDL_RenderTexture(renderer
-                         , SDL_CreateTextureFromSurface(renderer
-                                                       , TTF_RenderText_Solid(font, phrase, 0
-                                                                             , SDL_Color { 255, 255, 255, 255 }))
-                         , NULL, &dst_rect);
+        SDL_Rect r;
+        for (const char* phrase : text)
+        {
+            r.w = strlen(phrase) * (int)(TEXT_SIZE / 2);
+            r.h = TEXT_SIZE;
+            r.x = TEXT_SIZE;
+            r.y = TEXT_SIZE * counter;
+            ++counter;
+            // Inline creation of surface from text and convertation it to texture and then render
+            // SDL_RenderTexture(renderer
+            //                  , SDL_CreateTextureFromSurface(renderer
+            //                                                , TTF_RenderText_Solid(font, phrase, 0
+            //                                                                      , SDL_Color { 255, 255, 255, 255 }))
+            //                  , NULL, &dst_rect);
+            surface = TTF_RenderText_Solid(font, phrase, 0, SDL_Color { 255, 255, 255, 255 });
+        }
+        SDL_UnlockTexture(texture);
     }
+
+    dst_rect.x = dst_rect.y = 0;
+    dst_rect.w = window_size.x;
+    dst_rect.h = window_size.y;
+    SDL_RenderTexture(renderer, texture, NULL, &dst_rect);
 
 
     SDL_RenderPresent(renderer);

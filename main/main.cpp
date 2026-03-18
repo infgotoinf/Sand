@@ -6,7 +6,6 @@
 /// @file
 /// @date 2026/03/15
 /// @copyright Copyright (c) 2026 -inf (@infgotoinf) v. DemDanEm (@DemDanEm).
-/// All rights reserved.
 /// All rights reserved.\n
 /// This file is under the MIT License (MIT)
 ///////////////////////////////////////////////////////////////////////////////
