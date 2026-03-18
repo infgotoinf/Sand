@@ -4,3 +4,10 @@
 [submodule "vendored/SDL_ttf"]
 	path = vendored/SDL_ttf
 	url = https://github.com/libsdl-org/SDL_ttf.git
+[submodule "vendored/freetype"]
+	path = vendored/freetype
+	url = https://github.com/freetype/freetype.git
+[submodule "vendored/harfbuzz"]
+	path = vendored/harfbuzz
+	url = https://github.com/harfbuzz/harfbuzz.git
+
