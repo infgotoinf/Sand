@@ -7,7 +7,6 @@
 /// @file
 /// @date 2026/03/15
 /// @copyright Copyright (c) 2026 -inf (@infgotoinf) v. DemDanEm (@DemDanEm).
-/// All rights reserved.
 /// All rights reserved.\n
 /// This file is under the MIT License (MIT)
 ///////////////////////////////////////////////////////////////////////////////
@@ -19,6 +18,7 @@
 #include <SDL3/SDL_render.h>
 #include <SDL3_ttf/SDL_ttf.h>
 
+#include <cstdint>
 #include <map>
 #include <utility>
 
@@ -26,7 +26,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 /// Enum that represents pixel type as a physical object.
 ///////////////////////////////////////////////////////////////////////////////
-enum PixelType {
+enum PixelType : uint8_t {
    SAND
   ,WATER
 };
@@ -79,11 +79,13 @@ typedef std::map<std::pair<int, int>, Pixel> PixelMap;
 /// https://www.geeksforgeeks.org/cpp/implementation-of-singleton-class-in-cpp/
 /// @author -inf (infgotoinf)
 /// @date 2026/03/15
+/// @todo Make this shit work faster it's toooooooo slow.
 ///////////////////////////////////////////////////////////////////////////////
 class World {
   static World* instance; ///< Poiner to the one existing instance of the world.
   SDL_Window* window; ///< SDL window.
   SDL_Renderer* renderer; ///< SDL renderer.
+  TTF_TextEngine* text_renderer; ///< TTF engine what is tied to World::renderer to easly render text.
   SDL_Texture* texture; ///< SDL texture.
   TTF_Font* font; ///< Fonts that are used for the text on the screen.
   Vector2 window_size; ///< Window width and height in pixels devided by PIXEL_SIZE.
@@ -260,14 +262,14 @@ public:
   /// else (false)
   /// endif
   /// :Redraw pixels on World::texture and render;
-  /// :Inline text render;
+  /// :Text render;
   /// @enduml
   ///
   /// @callgraph
   /// @returns SDL_APP_CONTINUE on success
   /// @returns SDL_APP_FAILURE on error
-  /// @todo Make screen resizing change pixel coordinates in pixel_map, so they
-  /// don't go off the screen.
+  /// @todo (Not sure if we really need this but) Make screen resizing change
+  /// pixel coordinates in pixel_map, so they don't go off the screen.
   /////////////////////////////////////////////////////////////////////////////
   SDL_AppResult redrawWorld();
 };
