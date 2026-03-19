@@ -8,12 +8,10 @@
 /// @copyright Copyright (c) 2026 -inf (@infgotoinf) v. DemDanEm (@DemDanEm).
 /// All rights reserved.\n
 /// This file is under the MIT License (MIT)
-/// @bug It takes a few seconds for the game process to die on quit signal.
-/// This bug occured after adding text rendering implementation in
-/// World::redrawWorld().
 ///////////////////////////////////////////////////////////////////////////////
 #include "include/classes.hpp"
 #include "SDL3/SDL_init.h"
+#include "SDL3/SDL_rect.h"
 #include "SDL3/SDL_render.h"
 
 #include <SDL3/SDL.h>
@@ -42,7 +40,7 @@
                                 , (Uint8) (255 - SDL_rand(COLOR_SPREAD)), 255 }
 
 /// Defines size of the text that is drawn on the screen.
-#define TEXT_SIZE 16
+#define TEXT_SIZE 8
 
 
 
@@ -85,8 +83,16 @@ SDL_AppResult World::initWorld() {
         return SDL_APP_FAILURE;
     }
 
+    // Font part
     if (!TTF_Init()) {
         SDL_Log("Couldn't initialize TTF: %s", SDL_GetError());
+        return SDL_APP_FAILURE;
+    }
+
+    text_renderer = TTF_CreateRendererTextEngine(renderer);
+    if (!text_renderer) {
+        SDL_Log("Couldn't create renderer text engine: %s", SDL_GetError());
+        TTF_Quit();
         return SDL_APP_FAILURE;
     }
 
@@ -255,38 +261,15 @@ SDL_AppResult World::redrawWorld()
     dst_rect.h = window_size.y;
     SDL_RenderTexture(renderer, texture, NULL, &dst_rect);
 
-    // TTF_RenderText_Solid ignores \n
-    static const char* text[4] = {"LMB - to start drawing pixels"
-                                , "1 - to select Sand"
-                                , "2 - to select Water"
-                                , "0 - to clean the screen"};
+    // Text rendering
+    static const char* text =
+R"(LMB - to start drawing pixels
+1 - to select Sand"
+2 - to select Water"
+0 - to clean the screen)";
 
-    int counter = 1;
-    if (SDL_LockTextureToSurface(texture, NULL, &surface))
-    {
-        SDL_Rect r;
-        for (const char* phrase : text)
-        {
-            r.w = strlen(phrase) * (int)(TEXT_SIZE / 2);
-            r.h = TEXT_SIZE;
-            r.x = TEXT_SIZE;
-            r.y = TEXT_SIZE * counter;
-            ++counter;
-            // Inline creation of surface from text and convertation it to texture and then render
-            // SDL_RenderTexture(renderer
-            //                  , SDL_CreateTextureFromSurface(renderer
-            //                                                , TTF_RenderText_Solid(font, phrase, 0
-            //                                                                      , SDL_Color { 255, 255, 255, 255 }))
-            //                  , NULL, &dst_rect);
-            surface = TTF_RenderText_Solid(font, phrase, 0, SDL_Color { 255, 255, 255, 255 });
-        }
-        SDL_UnlockTexture(texture);
-    }
-
-    dst_rect.x = dst_rect.y = 0;
-    dst_rect.w = window_size.x;
-    dst_rect.h = window_size.y;
-    SDL_RenderTexture(renderer, texture, NULL, &dst_rect);
+    static TTF_Text* text_text = TTF_CreateText(text_renderer, font, text, 0);
+    TTF_DrawRendererText(text_text, TEXT_SIZE, TEXT_SIZE);
 
 
     SDL_RenderPresent(renderer);

@@ -9,8 +9,8 @@
 /// All rights reserved.\n
 /// This file is under the MIT License (MIT)
 ///////////////////////////////////////////////////////////////////////////////
-#include "SDL3/SDL_keycode.h"
 #define SDL_MAIN_USE_CALLBACKS 1  /* use the callbacks instead of main() */
+#include <SDL3/SDL_keycode.h>
 #include <SDL3/SDL_main.h>
 #include <SDL3/SDL.h>
 
