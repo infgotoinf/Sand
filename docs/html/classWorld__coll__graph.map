@@ -1,0 +1,6 @@
+<map id="World" name="World">
+<area shape="rect" id="Node000001" title="Singleton class of the world." alt="" coords="5,173,161,625"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="163,350,173,357,181,367,186,381,188,399,185,421,177,437,172,434,180,419,183,399,181,383,176,370,169,361,160,355"/>
+<area shape="rect" id="Node000002" href="$structVector2.html" title="Struct what represends objects position in 2D space." alt="" coords="29,5,137,100"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="86,100,86,156,81,156,81,100"/>
+</map>
