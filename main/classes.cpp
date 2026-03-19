@@ -10,9 +10,6 @@
 /// This file is under the MIT License (MIT)
 ///////////////////////////////////////////////////////////////////////////////
 #include "include/classes.hpp"
-#include "SDL3/SDL_init.h"
-#include "SDL3/SDL_rect.h"
-#include "SDL3/SDL_render.h"
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
@@ -23,10 +20,13 @@
 
 /// Defines pixel size in pixels.
 /// Makes pixel that much bigger than a regular pixel on the screen.
-#define PIXEL_SIZE 5
+#define PIXEL_SIZE 3
 
 /// Defines how off the mouse cursor's coordinates pixels can spawn.
 #define BRUSH_SPREAD 3
+
+/// Defines how much pixels will me spawned each time World::addPixel() inwoked.
+#define BRUSH_DENCITY (BRUSH_SPREAD * 3)
 
 /// Defines with how off the default color pixel color can be.
 #define COLOR_SPREAD 100
@@ -111,20 +111,24 @@ void World::addPixel() {
     float mouse_x, mouse_y;
     SDL_GetMouseState(&mouse_x, &mouse_y);
 
-    Vector2 mouse_pos = { (int)mouse_x / PIXEL_SIZE + (SDL_rand(BRUSH_SPREAD) * (SDL_rand(2) ? -1 : 1))
-                        , (int)mouse_y / PIXEL_SIZE + (SDL_rand(BRUSH_SPREAD) * (SDL_rand(2) ? -1 : 1))};
+    SDL_Color color = selected_pixel_type == SAND ? SAND_COLOR : WATER_COLOR;
 
-    // Fix pixel pos if it's off the screen
-    if (mouse_pos.x > window_size.x) mouse_pos.x = window_size.x;
-    if (mouse_pos.y > window_size.y) mouse_pos.y = window_size.y;
-    if (mouse_pos.x < 0) mouse_pos.x = 0;
-    if (mouse_pos.y < 0) mouse_pos.y = 0;
-
-    // Add the pixel to pixel_map if there is no pixel with such coordinats
-    if (!pixel_map.contains({ mouse_pos.x, mouse_pos.y }))
+    for (int i = 0; i < BRUSH_DENCITY; ++i)
     {
-        SDL_Color color = selected_pixel_type == SAND ? SAND_COLOR : WATER_COLOR;
-        pixel_map.insert({ { mouse_pos.x, mouse_pos.y }, Pixel{ color, selected_pixel_type } });
+        Vector2 mouse_pos = { (int)mouse_x / PIXEL_SIZE + (SDL_rand(BRUSH_SPREAD) * (SDL_rand(2) ? -1 : 1))
+                            , (int)mouse_y / PIXEL_SIZE + (SDL_rand(BRUSH_SPREAD) * (SDL_rand(2) ? -1 : 1))};
+
+        // Fix pixel pos if it's off the screen
+        if (mouse_pos.x > window_size.x) mouse_pos.x = window_size.x;
+        if (mouse_pos.y > window_size.y) mouse_pos.y = window_size.y;
+        if (mouse_pos.x < 0) mouse_pos.x = 0;
+        if (mouse_pos.y < 0) mouse_pos.y = 0;
+
+        // Add the pixel to pixel_map if there is no pixel with such coordinats
+        if (!pixel_map.contains({ mouse_pos.x, mouse_pos.y }))
+        {
+            pixel_map.insert({ { mouse_pos.x, mouse_pos.y }, Pixel{ color, selected_pixel_type } });
+        }
     }
 }
 
