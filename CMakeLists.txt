@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.16)
-project(Sand)
-
 # To use std::map<>.contains()
 set (CMAKE_CXX_STANDARD 20)
 set (CMAKE_CXX_STANDARD_REQUIRED true)
+
+project(Sand)
 
 # This chunk of code exists to make my clangd LSP in Helix work with SDL3
 # https://mzhang.io/posts/2022-03-03-clangd-in-nix/
