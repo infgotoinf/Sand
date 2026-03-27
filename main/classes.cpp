@@ -10,6 +10,7 @@
 /// This file is under the MIT License (MIT)
 ///////////////////////////////////////////////////////////////////////////////
 #include "include/classes.hpp"
+#define SDL_MAIN_HANDLED
 #include "SDL3/SDL_init.h"
 #include "SDL3/SDL_rect.h"
 #include "SDL3/SDL_render.h"
