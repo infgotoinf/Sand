@@ -29,6 +29,7 @@ build/sand
 > Uninstall windows and intall linux to follow linux build steps
 
 1: Install MSYS2 https://github.com/msys2/msys2-installer/releases
+
 2: Launch MSYS2 UCRT64 and update the packages
 ```shell
 pacman -Syu
