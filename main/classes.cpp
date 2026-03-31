@@ -21,7 +21,7 @@
 
 /// Defines pixel size in pixels.
 /// Makes pixel that much bigger than a regular pixel on the screen.
-#define PIXEL_SIZE 3
+#define PIXEL_SIZE 4
 
 /// Defines how off the mouse cursor's coordinates pixels can spawn.
 #define BRUSH_SPREAD 5

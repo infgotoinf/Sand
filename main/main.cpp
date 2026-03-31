@@ -17,7 +17,7 @@
 
 
 /// Defines how many times per second game will be updated.
-#define FPS 100
+#define FPS 200
 
 /// Defines how many miliseconds should be waited to update.
 #define BETWEEN_FRAME_INTERVAL (1000 / FPS)
@@ -79,10 +79,10 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 SDL_AppResult SDL_AppIterate(void *appstate)
 {
     static Uint64 now = 0;
-    // if (SDL_GetTicks() > now) {
-    //     now += BETWEEN_FRAME_INTERVAL;
+    if (SDL_GetTicks() > now) {
+        now += BETWEEN_FRAME_INTERVAL;
         return world->redrawWorld();
-    // }
+    }
     return SDL_APP_CONTINUE;
 }
 
