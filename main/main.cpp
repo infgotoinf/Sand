@@ -17,7 +17,7 @@
 
 
 /// Defines how many times per second game will be updated.
-#define FPS 200
+#define FPS 100
 
 /// Defines how many miliseconds should be waited to update.
 #define BETWEEN_FRAME_INTERVAL (1000 / FPS)
@@ -66,7 +66,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
             world->selected_pixel_type = WATER;
         if (event->key.key == SDLK_0)
             world->clearWorld();
-            
+
     }
     return SDL_APP_CONTINUE;  /* carry on with the program! */
 }
