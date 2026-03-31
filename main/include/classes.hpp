@@ -27,7 +27,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 enum PixelType : uint8_t
 {
-     VOID
+     SEG_FAULT
+    ,VOID
     ,SAND
     ,WATER
 };
@@ -72,13 +73,6 @@ struct Pixel
 
 
 ///////////////////////////////////////////////////////////////////////////////
-/// Map with key being std::pair<int, int> that represents pixel position in
-/// 2D space on the screen, and value being Pixel.
-///////////////////////////////////////////////////////////////////////////////
-typedef std::map<std::pair<int, int>, Pixel> PixelMap;
-
-
-///////////////////////////////////////////////////////////////////////////////
 /// Singleton class of the world
 ///
 /// @note Took this as a reference
@@ -95,7 +89,6 @@ class World
     SDL_Texture *texture; ///< SDL texture.
     TTF_Font *font; ///< Fonts that are used for the text on the screen.
     Pixel **pixel_matrix; ///< Dynamicaly sized Pixel matrix what contains all phical object pixels.
-    // PixelMap pixel_map; ///< PixelMap what contains all phical object pixels.
     Vector2 window_size; ///< Window width and height in pixels devided by PIXEL_SIZE.
 
     /////////////////////////////////////////////////////////////////////////////
@@ -115,7 +108,7 @@ class World
     /// @returns true - if pos not avalible
     /// @returns false - overwise
     /////////////////////////////////////////////////////////////////////////////
-    bool checkIfCanMove(Vector2 pos);
+    PixelType checkPixel(Vector2 pos);
 
     /////////////////////////////////////////////////////////////////////////////
     /// Recalculates position of each pixel in pixel_map according to their

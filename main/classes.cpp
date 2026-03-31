@@ -16,6 +16,7 @@
 #include <SDL3_ttf/SDL_ttf.h>
 
 #include <algorithm>
+#include <utility>
 
 
 /// Defines pixel size in pixels.
@@ -23,7 +24,7 @@
 #define PIXEL_SIZE 3
 
 /// Defines how off the mouse cursor's coordinates pixels can spawn.
-#define BRUSH_SPREAD 3
+#define BRUSH_SPREAD 5
 
 /// Defines how much pixels will me spawned each time World::addPixel() inwoked.
 #define BRUSH_DENCITY (BRUSH_SPREAD * 3)
@@ -74,9 +75,9 @@ void fillWithVoidPixels(Pixel **pixel_matrix, Vector2 window_size)
 
     for (int y = 0; y < window_size.y; ++y) {
         pixel_matrix[y] = new Pixel[window_size.x] {void_pixel};
-        // for (int x = 0; x < window_size.x; ++x) {
-        //     pixel_matrix[y][x] = void_pixel;
-        // }
+        for (int x = 0; x < window_size.x; ++x) {
+            pixel_matrix[y][x] = void_pixel;
+        }
     }
 }
 
@@ -199,26 +200,26 @@ void World::clearWorld()
 }
 
 
-bool World::checkIfCanMove(Vector2 pos)
+PixelType World::checkPixel(Vector2 pos)
 {
     const bool is_out_of_bounds = pos.x > window_size.x / PIXEL_SIZE - 1 || pos.x < 0
                                || pos.y > window_size.y / PIXEL_SIZE - 1 || pos.y < 0;
     if (is_out_of_bounds)
-        return false;
+        return SEG_FAULT;
 
-    if (pixel_matrix[pos.y][pos.x].type != VOID)
-        return false;
-
-    return true;
+    return pixel_matrix[pos.y][pos.x].type;
 }
 
 
 void World::recalcWorld()
 {
-    for (int y = 0; y < window_size.y / PIXEL_SIZE; ++y)
+    for (int y = window_size.y / PIXEL_SIZE - 1; y > 0; --y)
     {
-        for (int x = 0; x < window_size.x / PIXEL_SIZE; ++x)
+        for (int x = window_size.x / PIXEL_SIZE / 2, j = 0, switch_j = 0
+        ; x < window_size.x / PIXEL_SIZE && x > 0; x += (switch_j ? j : -j))
         {
+            j++;
+            switch_j = ! switch_j;
             if (pixel_matrix[y][x].was_updated)
                 continue;
 
@@ -230,54 +231,72 @@ void World::recalcWorld()
 
             pixel_matrix[y][x].was_updated = true;
 
-            const bool can_fall_down = checkIfCanMove({ x, y + 1 });
-            if (can_fall_down) {
-                std::swap(pixel_matrix[y][x], pixel_matrix[y + 1][x]);
-            }
-            else {
-                const bool can_fall_down_left  = checkIfCanMove({ x - 1, y + 1 });
-                const bool can_fall_down_right = checkIfCanMove({ x + 1, y + 1 });
+            const PixelType down = checkPixel({ x, y + 1 });
+            const PixelType down_left  = checkPixel({ x - 1, y + 1 });
+            const PixelType down_right = checkPixel({ x + 1, y + 1 });
+            const PixelType left  = checkPixel({ x - 1, y });
+            const PixelType right = checkPixel({ x + 1, y });
 
-                const bool can_fall_left  = checkIfCanMove({ x - 1, y });
-                const bool can_fall_right = checkIfCanMove({ x + 1, y });
+            bool can_fall_down;
+            bool can_fall_down_right;
+            bool can_fall_down_left;
+            bool can_fall_right;
+            bool can_fall_left;
 
-                switch(pixel_matrix[y][x].type) {
-                case SAND:
-                    if (can_fall_down_left && can_fall_down_right && can_fall_left && can_fall_right)
-                        std::swap(pixel_matrix[y][x], pixel_matrix[y][x + (SDL_rand(2) ? 1 : -1)]);
+            switch(pixel_matrix[y][x].type) {
+            case SAND:
+                can_fall_down = (down == VOID || down == WATER);
+                can_fall_down_right = (down_right == VOID || down_right == WATER);
+                can_fall_down_left = (down_left == VOID || down_left == WATER);
+                can_fall_right = (right == VOID || right == WATER);
+                can_fall_left = (left == VOID || left == WATER);
 
-                    else if (can_fall_down_left && can_fall_left)
+                if (can_fall_down)
+                    std::swap(pixel_matrix[y][x], pixel_matrix[y + 1][x]);
+
+                else if (can_fall_down_left && can_fall_down_right && can_fall_left && can_fall_right)
+                    std::swap(pixel_matrix[y][x], pixel_matrix[y][x + switch_j]);
+
+                else if (can_fall_down_left && can_fall_left)
+                    std::swap(pixel_matrix[y][x], pixel_matrix[y][x - 1]);
+
+                else if (can_fall_down_right && can_fall_right)
+                    std::swap(pixel_matrix[y][x], pixel_matrix[y][x + 1]);
+
+                break;
+
+            case WATER:
+                can_fall_down = (down == VOID);
+                can_fall_down_right = (down_right == VOID);
+                can_fall_down_left = (down_left == VOID);
+                can_fall_right = (right == VOID);
+                can_fall_left = (left == VOID);
+
+                if (can_fall_down)
+                    std::swap(pixel_matrix[y][x], pixel_matrix[y + 1][x]);
+
+                else if (can_fall_down_left && can_fall_down_right)
+                    std::swap(pixel_matrix[y][x], pixel_matrix[y + 1][x - switch_j]);
+
+                else if (can_fall_down_left)
+                    std::swap(pixel_matrix[y][x], pixel_matrix[y + 1][x - 1]);
+
+                else if (can_fall_down_right)
+                    std::swap(pixel_matrix[y][x], pixel_matrix[y + 1][x + 1]);
+
+                else
+                {
+                    if (can_fall_left && can_fall_right)
+                        std::swap(pixel_matrix[y][x], pixel_matrix[y][x - switch_j]);
+
+                    else if (can_fall_left)
                         std::swap(pixel_matrix[y][x], pixel_matrix[y][x - 1]);
 
-                    else if (can_fall_down_right && can_fall_right)
+                    else if (can_fall_right)
                         std::swap(pixel_matrix[y][x], pixel_matrix[y][x + 1]);
-
-                    break;
-
-                case WATER:
-                    if (can_fall_down_left && can_fall_down_right)
-                        std::swap(pixel_matrix[y][x], pixel_matrix[y][x + (SDL_rand(2) ? 1 : -1)]);
-
-                    else if (can_fall_down_left)
-                        std::swap(pixel_matrix[y][x], pixel_matrix[y + 1][x - 1]);
-
-                    else if (can_fall_down_right)
-                        std::swap(pixel_matrix[y][x], pixel_matrix[y + 1][x + 1]);
-
-                    else
-                    {
-                        if (can_fall_left && can_fall_right)
-                            std::swap(pixel_matrix[y][x], pixel_matrix[y][x + (SDL_rand(2) ? 1 : -1)]);
-
-                        else if (can_fall_left)
-                            std::swap(pixel_matrix[y][x], pixel_matrix[y][x - 1]);
-
-                        else if (can_fall_right)
-                            std::swap(pixel_matrix[y][x], pixel_matrix[y][x + 1]);
-                    }
                 }
-                pixel_matrix[y][x].was_updated = true;
             }
+            pixel_matrix[y][x].was_updated = true;
         }
     }
 
