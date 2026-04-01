@@ -10,6 +10,7 @@
 /// This file is under the MIT License (MIT)
 ///////////////////////////////////////////////////////////////////////////////
 #include "include/classes.hpp"
+#include "SDL3/SDL_stdinc.h"
 
 #define SDL_MAIN_HANDLED
 #include <SDL3/SDL.h>
@@ -214,13 +215,29 @@ PixelType World::checkPixel(Vector2 pos)
 
 void World::recalcWorld()
 {
-    for (int y = window_size.y / PIXEL_SIZE - 1; y > 0; --y)
+    for (int y = -2, switch_y = true;;)
     {
-        for (int x = window_size.x / PIXEL_SIZE / 2, j = 0, switch_j = 0
-        ; x < window_size.x / PIXEL_SIZE && x > 0; x += (switch_j ? j : -j))
+        y += (switch_y ? 2 : -2);
+        if (switch_y == true) {
+            if (y > window_size.y / PIXEL_SIZE - 1) {
+                y -= y - (window_size.y / PIXEL_SIZE - 1) + (window_size.y / PIXEL_SIZE) % 2;
+                switch_y = !switch_y;
+            }
+        }
+        else if (y < 0) break;
+
+        for (int x = -2, switch_x = true;;)
         {
-            j++;
-            switch_j = ! switch_j;
+            x += (switch_x ? 2 : -2);
+            if (switch_x == true) {
+                if (x > window_size.x / PIXEL_SIZE - 1) {
+                    x -= x - (window_size.x / PIXEL_SIZE - 1) + (window_size.x / PIXEL_SIZE) % 2;
+                    switch_x = !switch_x;
+                }
+            }
+            else if (x < 0) break;
+
+            // switch_j = ! switch_j;
             if (pixel_matrix[y][x].was_updated)
                 continue;
 
@@ -256,7 +273,7 @@ void World::recalcWorld()
                     std::swap(pixel_matrix[y][x], pixel_matrix[y + 1][x]);
 
                 else if (can_fall_down_left && can_fall_down_right && can_fall_left && can_fall_right)
-                    std::swap(pixel_matrix[y][x], pixel_matrix[y][x + switch_j]);
+                    std::swap(pixel_matrix[y][x], pixel_matrix[y][x + (SDL_rand(2) ? 1: -1)]);
 
                 else if (can_fall_down_left && can_fall_left)
                     std::swap(pixel_matrix[y][x], pixel_matrix[y][x - 1]);
@@ -277,7 +294,7 @@ void World::recalcWorld()
                     std::swap(pixel_matrix[y][x], pixel_matrix[y + 1][x]);
 
                 else if (can_fall_down_left && can_fall_down_right)
-                    std::swap(pixel_matrix[y][x], pixel_matrix[y + 1][x - switch_j]);
+                    std::swap(pixel_matrix[y][x], pixel_matrix[y + 1][x + (SDL_rand(2) ? 1 : -1)]);
 
                 else if (can_fall_down_left)
                     std::swap(pixel_matrix[y][x], pixel_matrix[y + 1][x - 1]);
@@ -288,7 +305,7 @@ void World::recalcWorld()
                 else
                 {
                     if (can_fall_left && can_fall_right)
-                        std::swap(pixel_matrix[y][x], pixel_matrix[y][x - switch_j]);
+                        std::swap(pixel_matrix[y][x], pixel_matrix[y][x + (SDL_rand(2) ? 1 : -1)]);
 
                     else if (can_fall_left)
                         std::swap(pixel_matrix[y][x], pixel_matrix[y][x - 1]);
