@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.16)
-# To use std::map<>.contains()
-set (CMAKE_CXX_STANDARD 20)
+project(Sand)
+
+set (CMAKE_CXX_STANDARD 11)
 set (CMAKE_CXX_STANDARD_REQUIRED true)
+# set (CMAKE_BUILD_TYPE Debug)
 
 project(Sand)
 
@@ -14,6 +16,8 @@ if(CMAKE_EXPORT_COMPILE_COMMANDS)
   set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES
     ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES})
 endif()
+
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
 
 # Use vendored libs
 set(SDLTTF_VENDORED ON)

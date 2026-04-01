@@ -4,3 +4,6 @@
 [submodule "vendored/SDL_ttf"]
 	path = vendored/SDL_ttf
 	url = https://github.com/libsdl-org/SDL_ttf.git
+[submodule "vendored/doxygen-awesome"]
+	path = vendored/doxygen-awesome
+	url = https://github.com/jothepro/doxygen-awesome-css.git

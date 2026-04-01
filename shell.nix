@@ -2,7 +2,7 @@
 pkgs.mkShell {
   nativeBuildInputs = with pkgs; [
     vulkan-validation-layers
-    
+
     alsa-lib
     libdecor
     libusb1
@@ -23,7 +23,7 @@ pkgs.mkShell {
 
     cmake
     ninja
-    
+
     doxygen
     graphviz
     plantuml

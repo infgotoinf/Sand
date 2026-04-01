@@ -12,7 +12,6 @@
 #define SDL_MAIN_USE_CALLBACKS 1  /* use the callbacks instead of main() */
 #include <SDL3/SDL_keycode.h>
 #include <SDL3/SDL_main.h>
-#include <SDL3/SDL.h>
 
 #include "include/classes.hpp"
 
@@ -67,7 +66,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
             world->selected_pixel_type = WATER;
         if (event->key.key == SDLK_0)
             world->clearWorld();
-            
+
     }
     return SDL_APP_CONTINUE;  /* carry on with the program! */
 }

@@ -1,0 +1,28 @@
+html {
+  /* primary theme color. This will affect the entire websites color scheme: links, arrows, labels, ... */
+  --primary-color: #fabd2f !important;
+  --primary-dark-color: #fe8019 !important;
+  --primary-light-color: #83a598 !important;
+  --primary-lighter-color: #d3869b !important;
+  --primary-lightest-color: #fb4934 !important;
+
+  --page-background-color: #1d2021 !important;
+  --page-foreground-color: #ebdbb2 !important;
+  --page-secondary-foreground-color: #665c54 !important;
+  --separator-color: #665c54 !important;
+  --side-nav-background: #3c3836 !important;
+  --side-nav-foreground: #ebdbb2 !important;
+  --toc-background: #3c3836 !important;
+  --searchbar-background: var(--page-background-color) !important;
+
+  /* https://stackoverflow.com/questions/40010597/how-do-i-apply-opacity-to-a-css-color-variable */
+  --note-color: color-mix(in srgb, #d3869b, transparent) !important;
+  --todo-color-dark: #d3869b !important;
+  --todo-color-darker: var(--page-foreground-color) !important;
+
+  --note-color: color-mix(in srgb, #83a598, transparent) !important;
+  --note-color-dark: #83a598 !important;
+  --note-color-darker: var(--page-foreground-color) !important;
+
+  border-radius: 0px !important;
+}
