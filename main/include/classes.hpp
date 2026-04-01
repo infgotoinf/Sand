@@ -30,6 +30,7 @@ enum PixelType : uint8_t
     ,VOID
     ,SAND
     ,WATER
+    ,STONE
 };
 
 
