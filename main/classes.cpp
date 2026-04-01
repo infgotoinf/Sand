@@ -51,8 +51,8 @@
                                 , (Uint8) (255 - SDL_rand(COLOR_SPREAD)) \
                                 , (Uint8) (255) }
 
-#define STONE_COLOR (SDL_Color) { (Uint8) (100 + SDL_rand(COLOR_SPREAD)) \
-                                , (Uint8) (100) \
+#define STONE_COLOR (SDL_Color) { (Uint8) (50 + SDL_rand(COLOR_SPREAD / 2)) \
+                                , (Uint8) (75 + SDL_rand(COLOR_SPREAD / 2)) \
                                 , (Uint8) (100) \
                                 , (Uint8) (255) }
 
