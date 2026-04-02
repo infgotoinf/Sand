@@ -64,6 +64,8 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
             world->selected_pixel_type = SAND;
         if (event->key.key == SDLK_2)
             world->selected_pixel_type = WATER;
+        if (event->key.key == SDLK_3)
+            world->selected_pixel_type = STONE;
         if (event->key.key == SDLK_0)
             world->clearWorld();
 

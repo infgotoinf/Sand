@@ -10,6 +10,7 @@
 /// This file is under the MIT License (MIT)
 ///////////////////////////////////////////////////////////////////////////////
 #include "include/classes.hpp"
+#include "SDL3/SDL_pixels.h"
 #include "SDL3/SDL_stdinc.h"
 
 #define SDL_MAIN_HANDLED
@@ -48,6 +49,11 @@
 #define WATER_COLOR (SDL_Color) { (Uint8) (0) \
                                 , (Uint8) (0) \
                                 , (Uint8) (255 - SDL_rand(COLOR_SPREAD)) \
+                                , (Uint8) (255) }
+
+#define STONE_COLOR (SDL_Color) { (Uint8) (50 + SDL_rand(COLOR_SPREAD / 2)) \
+                                , (Uint8) (75 + SDL_rand(COLOR_SPREAD / 2)) \
+                                , (Uint8) (100) \
                                 , (Uint8) (255) }
 
 /// Defines size of the text that is drawn on the screen.
@@ -140,7 +146,23 @@ void World::addPixel() {
     float mouse_x, mouse_y;
     SDL_GetMouseState(&mouse_x, &mouse_y);
 
-    SDL_Color color = (selected_pixel_type == SAND ? SAND_COLOR : WATER_COLOR);
+    SDL_Color color;
+    switch (selected_pixel_type) {
+    case SAND:
+        color = SAND_COLOR;
+        break;
+
+    case WATER:
+        color = WATER_COLOR;
+        break;
+
+    case STONE:
+        color = STONE_COLOR;
+        break;
+
+    default:
+        color = SAND_COLOR;
+    }
 
     for (int i = 0; i < BRUSH_DENCITY; ++i)
     {
@@ -148,8 +170,8 @@ void World::addPixel() {
                             , (int)mouse_y / PIXEL_SIZE + (SDL_rand(BRUSH_SPREAD) * (SDL_rand(2) ? -1 : 1))};
 
         // Fix pixel pos if it's off the screen
-        if (mouse_pos.x > window_size.x / PIXEL_SIZE) mouse_pos.x = window_size.x / PIXEL_SIZE;
-        if (mouse_pos.y > window_size.y / PIXEL_SIZE) mouse_pos.y = window_size.y / PIXEL_SIZE;
+        if (mouse_pos.x > window_size.x / PIXEL_SIZE - 1) mouse_pos.x = window_size.x / PIXEL_SIZE - 1;
+        if (mouse_pos.y > window_size.y / PIXEL_SIZE - 1) mouse_pos.y = window_size.y / PIXEL_SIZE - 1;
         if (mouse_pos.x < 0) mouse_pos.x = 0;
         if (mouse_pos.y < 0) mouse_pos.y = 0;
 
@@ -313,6 +335,11 @@ void World::recalcWorld()
                     else if (can_fall_right)
                         std::swap(pixel_matrix[y][x], pixel_matrix[y][x + 1]);
                 }
+                break;
+
+            default:
+                pixel_matrix[y][x].was_updated = true;
+                continue;
             }
             pixel_matrix[y][x].was_updated = true;
         }
@@ -391,8 +418,9 @@ SDL_AppResult World::redrawWorld()
     // Text rendering
     static const char* text =
 R"(LMB - to start drawing pixels
-1 - to select Sand"
-2 - to select Water"
+1 - to select Sand
+2 - to select Water
+3 - to select Stone
 0 - to clean the screen)";
 
     static TTF_Text* text_text = TTF_CreateText(text_renderer, font, text, 0);
