@@ -54,6 +54,21 @@ cmake --build build
 ```shell
 build/sand
 ```
+### Steps to build the test
+1: Generate build config with BUILD_TESTING enabled
+```shell
+cmake -B build -DBUILD_TESTING=ON
+```
+
+2: Build the game
+```shell
+cmake --build build
+```
+
+3: Run the test
+```shell
+ctest --test-dir build
+```
 
 ### Steps to build the docs
 1: Build docs
