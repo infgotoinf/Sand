@@ -175,10 +175,35 @@ void World::addPixel() {
         if (mouse_pos.x < 0) mouse_pos.x = 0;
         if (mouse_pos.y < 0) mouse_pos.y = 0;
 
-        // Add the pixel to pixel_map if there is no pixel with such coordinats
-        if (pixel_matrix[mouse_pos.y][mouse_pos.x].type == VOID)
-        {
-            pixel_matrix[mouse_pos.y][mouse_pos.x] = { color, selected_pixel_type, false };
+
+        switch (selected_pixel_type) {
+        case SAND:
+            if (pixel_matrix[mouse_pos.y][mouse_pos.x].type == VOID
+             || pixel_matrix[mouse_pos.y][mouse_pos.x].type == WATER)
+            {
+                pixel_matrix[mouse_pos.y][mouse_pos.x] = { color, selected_pixel_type, false };
+            }
+            break;
+
+        case WATER:
+            if (pixel_matrix[mouse_pos.y][mouse_pos.x].type == VOID)
+            {
+                pixel_matrix[mouse_pos.y][mouse_pos.x] = { color, selected_pixel_type, false };
+            }
+            break;
+
+        case STONE:
+            if (pixel_matrix[mouse_pos.y][mouse_pos.x].type != STONE)
+            {
+                pixel_matrix[mouse_pos.y][mouse_pos.x] = { color, selected_pixel_type, false };
+            }
+            break;
+
+        default:
+            if (pixel_matrix[mouse_pos.y][mouse_pos.x].type == VOID)
+            {
+                pixel_matrix[mouse_pos.y][mouse_pos.x] = { color, selected_pixel_type, false };
+            }
         }
     }
 }
