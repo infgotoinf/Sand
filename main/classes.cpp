@@ -175,10 +175,35 @@ void World::addPixel() {
         if (mouse_pos.x < 0) mouse_pos.x = 0;
         if (mouse_pos.y < 0) mouse_pos.y = 0;
 
-        // Add the pixel to pixel_map if there is no pixel with such coordinats
-        if (pixel_matrix[mouse_pos.y][mouse_pos.x].type == VOID)
-        {
-            pixel_matrix[mouse_pos.y][mouse_pos.x] = { color, selected_pixel_type, false };
+
+        switch (selected_pixel_type) {
+        case SAND:
+            if (pixel_matrix[mouse_pos.y][mouse_pos.x].type == VOID
+             || pixel_matrix[mouse_pos.y][mouse_pos.x].type == WATER)
+            {
+                pixel_matrix[mouse_pos.y][mouse_pos.x] = { color, selected_pixel_type, false };
+            }
+            break;
+
+        case WATER:
+            if (pixel_matrix[mouse_pos.y][mouse_pos.x].type == VOID)
+            {
+                pixel_matrix[mouse_pos.y][mouse_pos.x] = { color, selected_pixel_type, false };
+            }
+            break;
+
+        case STONE:
+            if (pixel_matrix[mouse_pos.y][mouse_pos.x].type != STONE)
+            {
+                pixel_matrix[mouse_pos.y][mouse_pos.x] = { color, selected_pixel_type, false };
+            }
+            break;
+
+        default:
+            if (pixel_matrix[mouse_pos.y][mouse_pos.x].type == VOID)
+            {
+                pixel_matrix[mouse_pos.y][mouse_pos.x] = { color, selected_pixel_type, false };
+            }
         }
     }
 }
@@ -196,20 +221,26 @@ void World::resizePixelMatrix(Vector2 old_window_size)
     Vector2 common_window_size = { std::min(old_window_size.x, window_size_copy.x)
                                  , std::min(old_window_size.y, window_size_copy.y) };
 
-    // Copy all pixels from pixel_matrix to new_pixel_matrix;
+
     for (int i = 0; i < common_window_size.y; ++i)
     {
         new_pixel_matrix[i] = new Pixel[window_size.x];
+    }
+
+    fillWithVoidPixels(new_pixel_matrix, window_size_copy);
+
+    // Copy all pixels from pixel_matrix to new_pixel_matrix;
+    for (int i = 0; i < common_window_size.y; ++i)
+    {
         std::copy(pixel_matrix[i], pixel_matrix[i] + common_window_size.x, new_pixel_matrix[i]);
     }
+
 
     // Clear pixel_matrix
     for (int i = 0; i < old_window_size.y; ++i) {
         delete [] pixel_matrix[i];
     }
     delete [] pixel_matrix;
-
-    fillWithVoidPixels(new_pixel_matrix, window_size_copy);
 
     pixel_matrix = std::move(new_pixel_matrix);
 }
