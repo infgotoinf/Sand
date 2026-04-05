@@ -23,7 +23,8 @@
 
 
 
-World::World() {
+World::World()
+{
     window_size = {640, 480};
     selected_pixel_type = SAND;
     font_path = "vendored/UnifontExMono.ttf";
@@ -32,9 +33,9 @@ World::World() {
 
 World::~World()
 {
-    for (int i = 0; i < pixel_matrix_size.x; ++i) {
+    for (int i = 0; i < pixel_matrix_size.x; ++i)
         delete [] pixel_matrix[i];
-    }
+
     delete [] pixel_matrix;
     SDL_DestroyTexture(texture);
     TTF_Quit();
@@ -56,12 +57,14 @@ void fillWithVoidPixels(Pixel **pixel_matrix, Vector2 pixel_matrix_size)
 }
 
 
-int roundUp(float num) {
+int roundUp(float num)
+{
     return (num > (int) num ? (int) num + 1 : (int) num);
 }
 
 
-SDL_AppResult World::initWorld() {
+SDL_AppResult World::initWorld()
+{
     SDL_SetAppMetadata("Sand the sandbox", "1.2", NULL);
 
     if (!SDL_Init(SDL_INIT_VIDEO)) {
@@ -112,7 +115,8 @@ SDL_AppResult World::initWorld() {
 }
 
 
-void World::addPixel(Vector2 mouse_pos) {
+void World::addPixel(Vector2 mouse_pos)
+{
     SDL_Color color;
     switch (selected_pixel_type) {
     case SAND:
@@ -189,23 +193,19 @@ void World::resizePixelMatrix(Vector2 old_pixel_matrix_size)
 
 
     for (int i = 0; i < common_pixel_matrix_size.x; ++i)
-    {
         new_pixel_matrix[i] = new Pixel[pixel_matrix_size.y];
-    }
 
     fillWithVoidPixels(new_pixel_matrix, pixel_matrix_size);
 
     // Copy all pixels from pixel_matrix to new_pixel_matrix;
     for (int i = 0; i < common_pixel_matrix_size.x; ++i)
-    {
         std::copy(pixel_matrix[i], pixel_matrix[i] + common_pixel_matrix_size.y, new_pixel_matrix[i]);
-    }
 
 
     // Clear pixel_matrix
-    for (int i = 0; i < old_pixel_matrix_size.x; ++i) {
+    for (int i = 0; i < old_pixel_matrix_size.x; ++i)
         delete [] pixel_matrix[i];
-    }
+
     delete [] pixel_matrix;
 
     pixel_matrix = std::move(new_pixel_matrix);
@@ -234,23 +234,20 @@ void World::recalcWorld()
 {
     for (int x = 0, switch_x = true; x >= 0; x += (switch_x ? 2 : -2))
     {
-        if (switch_x == true) {
-            if (x > pixel_matrix_size.x - 1) {
-                x -= x - (pixel_matrix_size.x - 1) + (pixel_matrix_size.x) % 2;
-                switch_x = !switch_x;
-            }
+        if (switch_x == true && x > pixel_matrix_size.x - 1)
+        {
+            x -= x - (pixel_matrix_size.x - 1) + (pixel_matrix_size.x) % 2;
+            switch_x = !switch_x;
         }
 
         for (int y = 0, switch_y = true; y >= 0; y += (switch_y ? 2 : -2))
         {
-            if (switch_y == true) {
-                if (y > pixel_matrix_size.y - 1) {
-                    y -= y - (pixel_matrix_size.y - 1) + (pixel_matrix_size.y) % 2;
-                    switch_y = !switch_y;
-                }
+            if (switch_y == true && y > pixel_matrix_size.y - 1)
+            {
+                y -= y - (pixel_matrix_size.y - 1) + (pixel_matrix_size.y) % 2;
+                switch_y = !switch_y;
             }
 
-            // switch_j = ! switch_j;
             if (pixel_matrix[x][y].was_updated)
                 continue;
 
@@ -337,12 +334,8 @@ void World::recalcWorld()
     }
 
     for (int x = 0; x < pixel_matrix_size.x; ++x)
-    {
         for (int y = 0; y < pixel_matrix_size.y; ++y)
-        {
             pixel_matrix[x][y].was_updated = false;
-        }
-    }
 }
 
 
@@ -369,7 +362,8 @@ SDL_AppResult World::redrawWorld()
 
     recalcWorld();
 
-    if (mouse_is_down) {
+    if (mouse_is_down)
+    {
         float x, y;
         SDL_GetMouseState(&x, &y);
         addPixel(Vector2 { (int) x, (int) y });

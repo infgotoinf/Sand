@@ -38,4 +38,12 @@
 /// Defines size of the text that is drawn on the screen.
 #define TEXT_SIZE 8
 
+
+
+/// Defines how many times per second game will be updated.
+#define FPS 200
+
+/// Defines how many miliseconds should be waited to update.
+#define BETWEEN_FRAME_INTERVAL (1000 / FPS)
+
 #endif // CONFIG_HPP
