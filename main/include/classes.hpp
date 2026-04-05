@@ -10,8 +10,8 @@
 /// All rights reserved.\n
 /// This file is under the MIT License (MIT)
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef CLASSES_H
-#define CLASSES_H
+#ifndef CLASSES_HPP
+#define CLASSES_HPP
 
 #include <SDL3/SDL_video.h>
 #include <SDL3/SDL_init.h>
@@ -83,11 +83,14 @@ struct Pixel
 class World
 {
     static World *instance; ///< Poiner to the one existing instance of the world.
+
+protected:
     SDL_Window *window; ///< SDL window.
     SDL_Renderer *renderer; ///< SDL renderer.
     TTF_TextEngine *text_renderer; ///< TTF engine what is tied to World::renderer to easly render text.
     SDL_Texture *texture; ///< SDL texture.
     TTF_Font *font; ///< Fonts that are used for the text on the screen.
+    const char* font_path; //< Path to used fonts.
     Pixel **pixel_matrix; ///< Dynamicaly sized Pixel matrix what contains all phical object pixels.
     Vector2 pixel_matrix_size; ///< Size of pixel_matrix
     Vector2 window_size; ///< Window width and height in pixels devided by PIXEL_SIZE.
@@ -285,4 +288,4 @@ public:
     SDL_AppResult redrawWorld();
 };
 
-#endif // CLASSES_H
+#endif // CLASSES_HPP
