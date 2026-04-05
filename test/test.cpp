@@ -1,12 +1,260 @@
-#include <catch2/catch_test_macros.hpp>
+#include "catch2/catch_test_macros.hpp"
+#include <catch2/catch_all.hpp>
 
-unsigned int Factorial( unsigned int number ) {
-    return number <= 1 ? number : Factorial(number-1)*number;
+#define CONFIG_HPP
+#define PIXEL_SIZE 1
+#define BRUSH_SPREAD 0
+#define BRUSH_DENCITY 1
+#define BG_COLOR (SDL_Color) { (Uint8) (0) \
+                             , (Uint8) (0) \
+                             , (Uint8) (0) \
+                             , (Uint8) (255) }
+#define SAND_COLOR BG_COLOR
+#define WATER_COLOR BG_COLOR
+#define STONE_COLOR BG_COLOR
+#define TEXT_SIZE 1
+#include "../main/classes.cpp"
+
+
+TEST_CASE("Vector2 != operator works correctly", "[vector2]") {
+    Vector2 a = {1, 2};
+    Vector2 b = {1, 1};
+    Vector2 c = {2, 1};
+    Vector2 d;
+
+    REQUIRE_FALSE( a != a );
+    REQUIRE( a != b );
+    REQUIRE( a != c );
+    REQUIRE( a != d );
 }
 
-TEST_CASE( "Factorials are computed", "[factorial]" ) {
-    REQUIRE( Factorial(1) == 1 );
-    REQUIRE( Factorial(2) == 2 );
-    REQUIRE( Factorial(3) == 6 );
-    REQUIRE( Factorial(10) == 3628800 );
+
+class TestWorld : public World {
+public:
+    TestWorld() : World()
+    {
+        window_size = {3, 3};
+        selected_pixel_type = SAND;
+        font_path = "vendored/UnifontExMono.ttf";
+    }
+};
+
+
+TEST_CASE_METHOD(TestWorld, "World::initWorld() works correctly", "[world][init]")
+{
+    SECTION("Member definition is correct")
+    {
+        REQUIRE(initWorld() == SDL_APP_CONTINUE);
+        REQUIRE(window_size.x == 3);
+        REQUIRE(window_size.y == 3);
+        REQUIRE(pixel_matrix_size.x == 3);
+        REQUIRE(pixel_matrix_size.y == 3);
+        REQUIRE( (int) selected_pixel_type == (int) SAND );
+    }
+
+    initWorld();
+    auto x = GENERATE(0, 1, 2);
+    SECTION("Correct filling of pixel_matrix with VOID")
+    {
+        auto y = GENERATE(0, 1, 2);
+        REQUIRE( (int) pixel_matrix[x][y].type == (int) VOID );
+    }
+}
+
+
+TEST_CASE_METHOD(TestWorld, "World::addPixel() works correctly", "[world][addpixel]")
+{
+    initWorld();
+    SECTION("Correct Pixel overrides")
+    {
+        addPixel({1, 1});
+        REQUIRE( (int) pixel_matrix[1][1].type == (int) SAND );
+
+        selected_pixel_type = WATER;
+        addPixel({1, 1});
+        REQUIRE( (int) pixel_matrix[1][1].type == (int) SAND );
+
+
+        addPixel({0, 1});
+        REQUIRE( (int) pixel_matrix[0][1].type == (int) WATER );
+
+        selected_pixel_type = SAND;
+        addPixel({0, 1});
+        REQUIRE( (int) pixel_matrix[0][1].type == (int) SAND );
+
+        selected_pixel_type = STONE;
+        addPixel({0, 1});
+        REQUIRE( (int) pixel_matrix[0][1].type == (int) STONE );
+
+        selected_pixel_type = SAND;
+        addPixel({0, 1});
+        REQUIRE( (int) pixel_matrix[0][1].type == (int) STONE );
+    }
+
+    SECTION("Correct out of bounds handling")
+    {
+        addPixel({-1, 0});
+        REQUIRE( (int) pixel_matrix[0][0].type == (int) SAND );
+
+        addPixel({-123, 345});
+        REQUIRE( (int) pixel_matrix[0][2].type == (int) SAND );
+    }
+}
+
+
+TEST_CASE_METHOD(TestWorld, "World::checkPixel() works correctly", "[world][checkpixel]")
+{
+    initWorld();
+    addPixel({1, 1});
+    selected_pixel_type = WATER;
+    addPixel({0, 1});
+    selected_pixel_type = STONE;
+    addPixel({2, 1});
+
+    auto x = GENERATE(-1, 0, 1, 2, 3);
+    SECTION("Correctly works")
+    {
+        auto y = GENERATE(-1, 0, 1, 2, 3);
+
+        if (x < 0 || x > 2 || y < 0 || y > 2)
+            REQUIRE( (int) checkPixel({x, y}) == (int) SEG_FAULT );
+
+        else if (x == 1 && y == 1 )
+            REQUIRE( (int) checkPixel({x, y}) == (int) SAND );
+
+        else if (x == 0 && y == 1 )
+            REQUIRE( (int) checkPixel({x, y}) == (int) WATER );
+
+        else if (x == 2 && y == 1 )
+            REQUIRE( (int) checkPixel({x, y}) == (int) STONE );
+
+        else
+            REQUIRE( (int) checkPixel({x, y}) == (int) VOID );
+    }
+}
+
+
+TEST_CASE_METHOD(TestWorld, "World::recalcWorld() works correctly", "[world][recalcworld]")
+{
+    SECTION("SAND and WATER pixel physics correct")
+    {
+        initWorld();
+        // _S_
+        // ___
+        // WTW
+        addPixel({1, 0});
+        selected_pixel_type = STONE;
+        addPixel({1, 2});
+        selected_pixel_type = WATER;
+        addPixel({0, 2});
+        addPixel({2, 2});
+
+        recalcWorld();
+        // ___
+        // _S_
+        // WTW
+        REQUIRE( (int) pixel_matrix[1][1].type == (int) SAND );
+
+        recalcWorld();
+        // ___    ___
+        // S__ or __S
+        // WTW    WTW
+        REQUIRE(( (int) pixel_matrix[0][1].type == (int) SAND
+               || (int) pixel_matrix[2][1].type == (int) SAND ));
+
+        recalcWorld();
+        // ___    ___
+        // W__ or __W
+        // STW    WTS
+        REQUIRE((
+            ( (int) pixel_matrix[0][2].type == (int) SAND
+           && (int) pixel_matrix[0][1].type == (int) WATER ) ||
+            ( (int) pixel_matrix[2][2].type == (int) SAND
+           && (int) pixel_matrix[2][1].type == (int) WATER )
+        ));
+
+        recalcWorld();
+        REQUIRE( (int) pixel_matrix[1][1].type == (int) WATER );
+    }
+
+    SECTION("STONE pixel physics correct")
+    {
+        initWorld();
+        selected_pixel_type = STONE;
+        addPixel({1, 1});
+
+        for (int i = 0; i < 20; ++i)
+            recalcWorld();
+
+        REQUIRE( (int) pixel_matrix[1][1].type == (int) STONE );
+    }
+}
+
+TEST_CASE_METHOD(TestWorld, "World::resizePixelMatrix() works correctly", "[world][resizepixelmatrix]")
+{
+    initWorld();
+    // __S
+    // __S
+    // SSS
+    addPixel({2, 0});
+    addPixel({2, 1});
+    addPixel({2, 2});
+    addPixel({1, 2});
+    addPixel({0, 2});
+
+    SECTION("Expanding works correct")
+    {
+        window_size = {4, 4};
+        resizePixelMatrix();
+
+        REQUIRE(pixel_matrix_size.x == 4);
+        REQUIRE(pixel_matrix_size.y == 4);
+
+        for (int x = 0; x < 4; ++x)
+        {
+            for (int y = 0; y < 4; ++y)
+            {
+                if ( (y == 2 && x < 3)
+                 || (x == 2 && y < 3 ))
+                    REQUIRE( (int) pixel_matrix[x][y].type == (int) SAND );
+
+                else if (y == 3 || x == 3)
+                    REQUIRE( (int) pixel_matrix[x][y].type == (int) VOID );
+            }
+        }
+    }
+
+    SECTION("Shrinking works correct")
+    {
+        window_size = {2, 2};
+        resizePixelMatrix();
+
+        REQUIRE(pixel_matrix_size.x == 2);
+        REQUIRE(pixel_matrix_size.y == 2);
+
+        for (int x = 0; x < 2; ++x)
+            for (int y = 0; y < 2; ++y)
+                if (y == 1 || x == 1)
+                    REQUIRE( (int) pixel_matrix[x][y].type == (int) VOID );
+    }
+}
+
+TEST_CASE_METHOD(TestWorld, "World::clearWorld() works correctly", "[world][clearWorld]")
+{
+    initWorld();
+    SECTION("Works correct")
+    {
+        for (int x; x < 3; ++x)
+            for (int y; y < 3; ++y)
+                addPixel({x, y});
+
+        clearWorld();
+
+        REQUIRE(pixel_matrix_size.x == 3);
+        REQUIRE(pixel_matrix_size.y == 3);
+
+        for (int x; x < 3; ++x)
+            for (int y; y < 3; ++y)
+                REQUIRE(pixel_matrix[x][y].type == VOID);
+    }
 }

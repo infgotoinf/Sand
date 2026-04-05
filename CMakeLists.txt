@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.16)
 
-set (CMAKE_CXX_STANDARD 11)
+set (CMAKE_CXX_STANDARD 17)
 set (CMAKE_CXX_STANDARD_REQUIRED true)
 
-project(Sand)
-
 if (BUILD_TESTING)
-  set(CMAKE_BUILD_TYPE "Debug")
+  set (CMAKE_BUILD_TYPE "Debug")
 endif()
+
+project(Sand)
 
 
 # This chunk of code exists to make my clangd LSP in Helix work with SDL3
@@ -37,7 +37,6 @@ add_subdirectory(vendored/SDL EXCLUDE_FROM_ALL)
 add_subdirectory(vendored/SDL_ttf EXCLUDE_FROM_ALL)
 
 
-# Create your game executable target as usual
 add_library(include_headers INTERFACE)
 target_sources(include_headers
   INTERFACE
@@ -47,6 +46,7 @@ target_sources(include_headers
       main/include
     FILES
       main/include/classes.hpp
+      main/include/config.hpp
 )
 
 add_executable(game WIN32
@@ -58,21 +58,19 @@ add_executable(game WIN32
 target_link_libraries(game PRIVATE include_headers SDL3::SDL3 SDL3_ttf::SDL3_ttf)
 
 
+# For testing
 if (BUILD_TESTING)
+  # https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md#top
   add_subdirectory(vendored/catch2 EXCLUDE_FROM_ALL)
+
   add_executable(game_test
     test/test.cpp
   )
 
-  enable_testing()
+  target_link_libraries(game_test PRIVATE include_headers SDL3::SDL3 SDL3_ttf::SDL3_ttf
+                        Catch2::Catch2WithMain)
 
-  add_test(
-    NAME
-      game_test
-
-    COMMAND
-      $<TARGET_FILE:game_test>
-  )
-
-  target_link_libraries(game_test PRIVATE include_headers Catch2::Catch2WithMain)
+  include(CTest)
+  include(Catch)
+  catch_discover_tests(game_test)
 endif()

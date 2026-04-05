@@ -221,7 +221,7 @@ protected:
     ///
     /// @param[in] Vector2 pixel_matrix of an old window_size.
     ///////////////////////////////////////////////////////////////////////////
-    void resizePixelMatrix(Vector2 old_pixel_matrix_size);
+    void resizePixelMatrix();
 
 public:
     bool mouse_is_down = false; ///< Stores current state of the mouse button, used in redrawWorld() to detect then addPixel() should be inwoked.

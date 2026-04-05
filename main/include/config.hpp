@@ -1,3 +1,14 @@
+///////////////////////////////////////////////////////////////////////////////
+/// File with all macro definitions.
+///
+/// @ref Used in main.cpp and classes.cpp
+///
+/// @file
+/// @date 2026/04/05
+/// @copyright Copyright (c) 2026 -inf (@infgotoinf) v. DemDanEm (@DemDanEm).
+/// All rights reserved.\n
+/// This file is under the MIT License (MIT)
+///////////////////////////////////////////////////////////////////////////////
 #ifndef CONFIG_HPP
 #define CONFIG_HPP
 

@@ -181,8 +181,10 @@ void World::addPixel(Vector2 mouse_pos)
 }
 
 
-void World::resizePixelMatrix(Vector2 old_pixel_matrix_size)
+void World::resizePixelMatrix()
 {
+    Vector2 old_pixel_matrix_size = pixel_matrix_size;
+
     pixel_matrix_size = { roundUp((float)window_size.x / PIXEL_SIZE)
                         , roundUp((float)window_size.y / PIXEL_SIZE) };
 
@@ -351,7 +353,7 @@ SDL_AppResult World::redrawWorld()
     {
         // Update pixel_matrix, window_size and texture to match actual window size
         window_size = current_window_size;
-        resizePixelMatrix(pixel_matrix_size);
+        resizePixelMatrix();
         texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING
                                   , window_size.x, window_size.y);
         if (!texture) {
