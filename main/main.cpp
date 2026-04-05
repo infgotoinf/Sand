@@ -14,13 +14,7 @@
 #include <SDL3/SDL_main.h>
 
 #include "include/classes.hpp"
-
-
-/// Defines how many times per second game will be updated.
-#define FPS 200
-
-/// Defines how many miliseconds should be waited to update.
-#define BETWEEN_FRAME_INTERVAL (1000 / FPS)
+#include "include/config.hpp"
 
 
 World* World::instance = nullptr;

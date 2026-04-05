@@ -7,3 +7,6 @@
 [submodule "vendored/doxygen-awesome"]
 	path = vendored/doxygen-awesome
 	url = https://github.com/jothepro/doxygen-awesome-css.git
+[submodule "vendored/catch2"]
+	path = vendored/catch2
+	url = https://github.com/catchorg/Catch2.git

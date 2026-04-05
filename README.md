@@ -1,6 +1,7 @@
 # Sand
 [Wiki](https://github.com/infgotoinf/Sand/wiki/О-проекте)
 
+
 ## Build
 ### Steps to build on linux
 0: If you're on nixos - enter the dev shell
@@ -23,6 +24,7 @@ cmake --build build
 ```shell
 build/sand
 ```
+
 
 ### Steps to build on windows
 0: If you have balls
@@ -54,6 +56,30 @@ cmake --build build
 ```shell
 build/sand
 ```
+
+
+### Steps to build the test
+1: Generate build config with BUILD_TESTING enabled
+```shell
+cmake -B build -DBUILD_TESTING=ON
+```
+
+2: Build the game
+```shell
+cmake --build build
+```
+
+3: Run the test
+```shell
+build/game_test -d yes
+```
+or
+```shell
+# But I recommend the first one, cause it's more colorfull and don't change
+# current folder for the executable test
+ctest --test-dir build
+```
+
 
 ### Steps to build the docs
 1: Build docs

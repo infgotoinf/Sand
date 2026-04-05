@@ -10,8 +10,6 @@
 /// This file is under the MIT License (MIT)
 ///////////////////////////////////////////////////////////////////////////////
 #include "include/classes.hpp"
-#include "SDL3/SDL_pixels.h"
-#include "SDL3/SDL_stdinc.h"
 
 #define SDL_MAIN_HANDLED
 #include <SDL3/SDL.h>
@@ -21,92 +19,67 @@
 #include <algorithm>
 #include <utility>
 
-
-/// Defines pixel size in pixels.
-/// Makes pixel that much bigger than a regular pixel on the screen.
-#define PIXEL_SIZE 4
-
-/// Defines how off the mouse cursor's coordinates pixels can spawn.
-#define BRUSH_SPREAD 5
-
-/// Defines how much pixels will me spawned each time World::addPixel() inwoked.
-#define BRUSH_DENCITY (BRUSH_SPREAD * 3)
-
-/// Defines with how off the default color pixel color can be.
-#define COLOR_SPREAD 100
-
-/// Background color of the screen.
-#define BG_COLOR   (SDL_Color) { (Uint8) (50) \
-                               , (Uint8) (50) \
-                               , (Uint8) (50) \
-                               , (Uint8) (255) }
-
-#define SAND_COLOR (SDL_Color) { (Uint8) (255) \
-                               , (Uint8) (255 - SDL_rand(COLOR_SPREAD)) \
-                               , (Uint8) (0 + SDL_rand(COLOR_SPREAD)) \
-                               , (Uint8) (255) }
-
-#define WATER_COLOR (SDL_Color) { (Uint8) (0) \
-                                , (Uint8) (0) \
-                                , (Uint8) (255 - SDL_rand(COLOR_SPREAD)) \
-                                , (Uint8) (255) }
-
-#define STONE_COLOR (SDL_Color) { (Uint8) (50 + SDL_rand(COLOR_SPREAD / 2)) \
-                                , (Uint8) (75 + SDL_rand(COLOR_SPREAD / 2)) \
-                                , (Uint8) (100) \
-                                , (Uint8) (255) }
-
-/// Defines size of the text that is drawn on the screen.
-#define TEXT_SIZE 8
+#include "include/config.hpp"
 
 
 
-World::World() {
+World::World()
+{
+    window_size = {640, 480};
     selected_pixel_type = SAND;
+    font_path = "vendored/UnifontExMono.ttf";
 }
 
 
 World::~World()
 {
-    for (int i = 0; i < window_size.y / PIXEL_SIZE; ++i) {
+    for (int i = 0; i < pixel_matrix_size.x; ++i)
         delete [] pixel_matrix[i];
-    }
+
     delete [] pixel_matrix;
     SDL_DestroyTexture(texture);
     TTF_Quit();
 }
 
 
-void fillWithVoidPixels(Pixel **pixel_matrix, Vector2 window_size)
+void fillWithVoidPixels(Pixel **pixel_matrix, Vector2 pixel_matrix_size)
 {
     Pixel void_pixel = { BG_COLOR, VOID, true };
 
-    for (int y = 0; y < window_size.y; ++y) {
-        pixel_matrix[y] = new Pixel[window_size.x] {void_pixel};
-        for (int x = 0; x < window_size.x; ++x) {
-            pixel_matrix[y][x] = void_pixel;
+    for (int x = 0; x < pixel_matrix_size.x; ++x)
+    {
+        pixel_matrix[x] = new Pixel[pixel_matrix_size.y] {void_pixel};
+        for (int y = 0; y < pixel_matrix_size.y; ++y)
+        {
+            pixel_matrix[x][y] = void_pixel;
         }
     }
 }
 
-SDL_AppResult World::initWorld() {
-    SDL_SetAppMetadata("Sand the sandbox", "1", NULL);
+
+int roundUp(float num)
+{
+    return (num > (int) num ? (int) num + 1 : (int) num);
+}
+
+
+SDL_AppResult World::initWorld()
+{
+    SDL_SetAppMetadata("Sand the sandbox", "1.2", NULL);
 
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         SDL_Log("Couldn't initialize SDL: %s", SDL_GetError());
         return SDL_APP_FAILURE;
     }
 
-    Vector2 initial_window_size = {640, 480};
-    window_size = initial_window_size;
-    if (!SDL_CreateWindowAndRenderer("Sandbox", initial_window_size.x, initial_window_size.y
+    if (!SDL_CreateWindowAndRenderer("Sandbox", window_size.x, window_size.y
                                     , SDL_WINDOW_RESIZABLE, &window, &renderer)) {
         SDL_Log("Couldn't create window/renderer: %s", SDL_GetError());
         return SDL_APP_FAILURE;
     }
 
     texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING
-                              , initial_window_size.x, initial_window_size.y);
+                              , window_size.x, window_size.y);
     if (!texture) {
         SDL_Log("Couldn't create streaming texture: %s", SDL_GetError());
         return SDL_APP_FAILURE;
@@ -125,7 +98,7 @@ SDL_AppResult World::initWorld() {
         return SDL_APP_FAILURE;
     }
 
-    font = TTF_OpenFont("vendored/UnifontExMono.ttf", TEXT_SIZE * 2);
+    font = TTF_OpenFont(font_path, TEXT_SIZE * 2);
     if (!font) {
         SDL_Log("Couldn't load font: %s", SDL_GetError());
         TTF_Quit();
@@ -133,19 +106,17 @@ SDL_AppResult World::initWorld() {
     }
 
     // Initialising pixel_matrix
-    pixel_matrix = new Pixel*[window_size.y / PIXEL_SIZE];
-    Vector2 window_size_copy = { window_size.x / PIXEL_SIZE
-                               , window_size.y / PIXEL_SIZE };
-    fillWithVoidPixels(pixel_matrix, window_size_copy);
+    pixel_matrix_size = { roundUp((float)window_size.x / PIXEL_SIZE)
+                        , roundUp((float)window_size.y / PIXEL_SIZE) };
+    pixel_matrix = new Pixel*[pixel_matrix_size.x];
+    fillWithVoidPixels(pixel_matrix, pixel_matrix_size);
 
     return SDL_APP_CONTINUE;  /* carry on with the program! */
 }
 
 
-void World::addPixel() {
-    float mouse_x, mouse_y;
-    SDL_GetMouseState(&mouse_x, &mouse_y);
-
+void World::addPixel(Vector2 mouse_pos)
+{
     SDL_Color color;
     switch (selected_pixel_type) {
     case SAND:
@@ -166,80 +137,77 @@ void World::addPixel() {
 
     for (int i = 0; i < BRUSH_DENCITY; ++i)
     {
-        Vector2 mouse_pos = { (int)mouse_x / PIXEL_SIZE + (SDL_rand(BRUSH_SPREAD) * (SDL_rand(2) ? -1 : 1))
-                            , (int)mouse_y / PIXEL_SIZE + (SDL_rand(BRUSH_SPREAD) * (SDL_rand(2) ? -1 : 1))};
+        Vector2 pixel_spawn_coord = { (int)mouse_pos.x / PIXEL_SIZE + (SDL_rand(BRUSH_SPREAD) * (SDL_rand(2) ? -1 : 1))
+                                    , (int)mouse_pos.y / PIXEL_SIZE + (SDL_rand(BRUSH_SPREAD) * (SDL_rand(2) ? -1 : 1))};
 
-        // Fix pixel pos if it's off the screen
-        if (mouse_pos.x > window_size.x / PIXEL_SIZE - 1) mouse_pos.x = window_size.x / PIXEL_SIZE - 1;
-        if (mouse_pos.y > window_size.y / PIXEL_SIZE - 1) mouse_pos.y = window_size.y / PIXEL_SIZE - 1;
-        if (mouse_pos.x < 0) mouse_pos.x = 0;
-        if (mouse_pos.y < 0) mouse_pos.y = 0;
+        // Fix pixel_spawn_coord if it's off the screen
+        if (pixel_spawn_coord.x > pixel_matrix_size.x - 1) pixel_spawn_coord.x = pixel_matrix_size.x - 1;
+        if (pixel_spawn_coord.y > pixel_matrix_size.y - 1) pixel_spawn_coord.y = pixel_matrix_size.y - 1;
+        if (pixel_spawn_coord.x < 0) pixel_spawn_coord.x = 0;
+        if (pixel_spawn_coord.y < 0) pixel_spawn_coord.y = 0;
 
 
+        // Override pixel logic
         switch (selected_pixel_type) {
         case SAND:
-            if (pixel_matrix[mouse_pos.y][mouse_pos.x].type == VOID
-             || pixel_matrix[mouse_pos.y][mouse_pos.x].type == WATER)
+            if (pixel_matrix[pixel_spawn_coord.x][pixel_spawn_coord.y].type == VOID
+             || pixel_matrix[pixel_spawn_coord.x][pixel_spawn_coord.y].type == WATER)
             {
-                pixel_matrix[mouse_pos.y][mouse_pos.x] = { color, selected_pixel_type, false };
+                pixel_matrix[pixel_spawn_coord.x][pixel_spawn_coord.y] = { color, selected_pixel_type, false };
             }
             break;
 
         case WATER:
-            if (pixel_matrix[mouse_pos.y][mouse_pos.x].type == VOID)
+            if (pixel_matrix[pixel_spawn_coord.x][pixel_spawn_coord.y].type == VOID)
             {
-                pixel_matrix[mouse_pos.y][mouse_pos.x] = { color, selected_pixel_type, false };
+                pixel_matrix[pixel_spawn_coord.x][pixel_spawn_coord.y] = { color, selected_pixel_type, false };
             }
             break;
 
         case STONE:
-            if (pixel_matrix[mouse_pos.y][mouse_pos.x].type != STONE)
+            if (pixel_matrix[pixel_spawn_coord.x][pixel_spawn_coord.y].type != STONE)
             {
-                pixel_matrix[mouse_pos.y][mouse_pos.x] = { color, selected_pixel_type, false };
+                pixel_matrix[pixel_spawn_coord.x][pixel_spawn_coord.y] = { color, selected_pixel_type, false };
             }
             break;
 
         default:
-            if (pixel_matrix[mouse_pos.y][mouse_pos.x].type == VOID)
+            if (pixel_matrix[pixel_spawn_coord.x][pixel_spawn_coord.y].type == VOID)
             {
-                pixel_matrix[mouse_pos.y][mouse_pos.x] = { color, selected_pixel_type, false };
+                pixel_matrix[pixel_spawn_coord.x][pixel_spawn_coord.y] = { color, selected_pixel_type, false };
             }
         }
     }
 }
 
 
-void World::resizePixelMatrix(Vector2 old_window_size)
+void World::resizePixelMatrix()
 {
-    old_window_size.x /= PIXEL_SIZE;
-    old_window_size.y /= PIXEL_SIZE;
-    Vector2 window_size_copy = { window_size.x / PIXEL_SIZE
-                               , window_size.y / PIXEL_SIZE };
+    Vector2 old_pixel_matrix_size = pixel_matrix_size;
 
-    Pixel **new_pixel_matrix = new Pixel*[window_size_copy.y];
+    pixel_matrix_size = { roundUp((float)window_size.x / PIXEL_SIZE)
+                        , roundUp((float)window_size.y / PIXEL_SIZE) };
 
-    Vector2 common_window_size = { std::min(old_window_size.x, window_size_copy.x)
-                                 , std::min(old_window_size.y, window_size_copy.y) };
+    Pixel **new_pixel_matrix = new Pixel*[pixel_matrix_size.x];
+
+    Vector2 common_pixel_matrix_size = { std::min(old_pixel_matrix_size.x, pixel_matrix_size.x)
+                                       , std::min(old_pixel_matrix_size.y, pixel_matrix_size.y) };
 
 
-    for (int i = 0; i < common_window_size.y; ++i)
-    {
-        new_pixel_matrix[i] = new Pixel[window_size.x];
-    }
+    for (int i = 0; i < common_pixel_matrix_size.x; ++i)
+        new_pixel_matrix[i] = new Pixel[pixel_matrix_size.y];
 
-    fillWithVoidPixels(new_pixel_matrix, window_size_copy);
+    fillWithVoidPixels(new_pixel_matrix, pixel_matrix_size);
 
     // Copy all pixels from pixel_matrix to new_pixel_matrix;
-    for (int i = 0; i < common_window_size.y; ++i)
-    {
-        std::copy(pixel_matrix[i], pixel_matrix[i] + common_window_size.x, new_pixel_matrix[i]);
-    }
+    for (int i = 0; i < common_pixel_matrix_size.x; ++i)
+        std::copy(pixel_matrix[i], pixel_matrix[i] + common_pixel_matrix_size.y, new_pixel_matrix[i]);
 
 
     // Clear pixel_matrix
-    for (int i = 0; i < old_window_size.y; ++i) {
+    for (int i = 0; i < old_pixel_matrix_size.x; ++i)
         delete [] pixel_matrix[i];
-    }
+
     delete [] pixel_matrix;
 
     pixel_matrix = std::move(new_pixel_matrix);
@@ -248,59 +216,50 @@ void World::resizePixelMatrix(Vector2 old_window_size)
 
 void World::clearWorld()
 {
-    pixel_matrix = new Pixel*[window_size.y / PIXEL_SIZE];
-    Vector2 window_size_copy = { window_size.x / PIXEL_SIZE
-                               , window_size.y / PIXEL_SIZE };
-    fillWithVoidPixels(pixel_matrix, window_size_copy);
+    pixel_matrix = new Pixel*[pixel_matrix_size.x];
+    fillWithVoidPixels(pixel_matrix, pixel_matrix_size);
 }
 
 
 PixelType World::checkPixel(Vector2 pos)
 {
-    const bool is_out_of_bounds = pos.x > window_size.x / PIXEL_SIZE - 1 || pos.x < 0
-                               || pos.y > window_size.y / PIXEL_SIZE - 1 || pos.y < 0;
+    const bool is_out_of_bounds = pos.x > pixel_matrix_size.x - 1 || pos.x < 0
+                               || pos.y > pixel_matrix_size.y - 1 || pos.y < 0;
     if (is_out_of_bounds)
         return SEG_FAULT;
 
-    return pixel_matrix[pos.y][pos.x].type;
+    return pixel_matrix[pos.x][pos.y].type;
 }
 
 
 void World::recalcWorld()
 {
-    for (int y = -2, switch_y = true;;)
+    for (int x = 0, switch_x = true; x >= 0; x += (switch_x ? 2 : -2))
     {
-        y += (switch_y ? 2 : -2);
-        if (switch_y == true) {
-            if (y > window_size.y / PIXEL_SIZE - 1) {
-                y -= y - (window_size.y / PIXEL_SIZE - 1) + (window_size.y / PIXEL_SIZE) % 2;
+        if (switch_x == true && x > pixel_matrix_size.x - 1)
+        {
+            x -= x - (pixel_matrix_size.x - 1) + (pixel_matrix_size.x) % 2;
+            switch_x = !switch_x;
+        }
+
+        for (int y = 0, switch_y = true; y >= 0; y += (switch_y ? 2 : -2))
+        {
+            if (switch_y == true && y > pixel_matrix_size.y - 1)
+            {
+                y -= y - (pixel_matrix_size.y - 1) + (pixel_matrix_size.y) % 2;
                 switch_y = !switch_y;
             }
-        }
-        else if (y < 0) break;
 
-        for (int x = -2, switch_x = true;;)
-        {
-            x += (switch_x ? 2 : -2);
-            if (switch_x == true) {
-                if (x > window_size.x / PIXEL_SIZE - 1) {
-                    x -= x - (window_size.x / PIXEL_SIZE - 1) + (window_size.x / PIXEL_SIZE) % 2;
-                    switch_x = !switch_x;
-                }
-            }
-            else if (x < 0) break;
-
-            // switch_j = ! switch_j;
-            if (pixel_matrix[y][x].was_updated)
+            if (pixel_matrix[x][y].was_updated)
                 continue;
 
-            if (pixel_matrix[y][x].type == VOID)
+            if (pixel_matrix[x][y].type == VOID)
             {
-                pixel_matrix[y][x].was_updated = true;
+                pixel_matrix[x][y].was_updated = true;
                 continue;
             }
 
-            pixel_matrix[y][x].was_updated = true;
+            pixel_matrix[x][y].was_updated = true;
 
             const PixelType down = checkPixel({ x, y + 1 });
             const PixelType down_left  = checkPixel({ x - 1, y + 1 });
@@ -314,7 +273,7 @@ void World::recalcWorld()
             bool can_fall_right;
             bool can_fall_left;
 
-            switch(pixel_matrix[y][x].type) {
+            switch(pixel_matrix[x][y].type) {
             case SAND:
                 can_fall_down = (down == VOID || down == WATER);
                 can_fall_down_right = (down_right == VOID || down_right == WATER);
@@ -323,16 +282,16 @@ void World::recalcWorld()
                 can_fall_left = (left == VOID || left == WATER);
 
                 if (can_fall_down)
-                    std::swap(pixel_matrix[y][x], pixel_matrix[y + 1][x]);
+                    std::swap(pixel_matrix[x][y], pixel_matrix[x][y + 1]);
 
                 else if (can_fall_down_left && can_fall_down_right && can_fall_left && can_fall_right)
-                    std::swap(pixel_matrix[y][x], pixel_matrix[y][x + (SDL_rand(2) ? 1: -1)]);
+                    std::swap(pixel_matrix[x][y], pixel_matrix[x + (SDL_rand(2) ? 1: -1)][y]);
 
                 else if (can_fall_down_left && can_fall_left)
-                    std::swap(pixel_matrix[y][x], pixel_matrix[y][x - 1]);
+                    std::swap(pixel_matrix[x][y], pixel_matrix[x - 1][y]);
 
                 else if (can_fall_down_right && can_fall_right)
-                    std::swap(pixel_matrix[y][x], pixel_matrix[y][x + 1]);
+                    std::swap(pixel_matrix[x][y], pixel_matrix[x + 1][y]);
 
                 break;
 
@@ -344,45 +303,41 @@ void World::recalcWorld()
                 can_fall_left = (left == VOID);
 
                 if (can_fall_down)
-                    std::swap(pixel_matrix[y][x], pixel_matrix[y + 1][x]);
+                    std::swap(pixel_matrix[x][y], pixel_matrix[x][y + 1]);
 
                 else if (can_fall_down_left && can_fall_down_right)
-                    std::swap(pixel_matrix[y][x], pixel_matrix[y + 1][x + (SDL_rand(2) ? 1 : -1)]);
+                    std::swap(pixel_matrix[x][y], pixel_matrix[x + (SDL_rand(2) ? 1 : -1)][y + 1]);
 
                 else if (can_fall_down_left)
-                    std::swap(pixel_matrix[y][x], pixel_matrix[y + 1][x - 1]);
+                    std::swap(pixel_matrix[x][y], pixel_matrix[x - 1][y + 1]);
 
                 else if (can_fall_down_right)
-                    std::swap(pixel_matrix[y][x], pixel_matrix[y + 1][x + 1]);
+                    std::swap(pixel_matrix[x][y], pixel_matrix[x + 1][y + 1]);
 
                 else
                 {
                     if (can_fall_left && can_fall_right)
-                        std::swap(pixel_matrix[y][x], pixel_matrix[y][x + (SDL_rand(2) ? 1 : -1)]);
+                        std::swap(pixel_matrix[x][y], pixel_matrix[x + (SDL_rand(2) ? 1 : -1)][y]);
 
                     else if (can_fall_left)
-                        std::swap(pixel_matrix[y][x], pixel_matrix[y][x - 1]);
+                        std::swap(pixel_matrix[x][y], pixel_matrix[x - 1][y]);
 
                     else if (can_fall_right)
-                        std::swap(pixel_matrix[y][x], pixel_matrix[y][x + 1]);
+                        std::swap(pixel_matrix[x][y], pixel_matrix[x + 1][y]);
                 }
                 break;
 
             default:
-                pixel_matrix[y][x].was_updated = true;
+                pixel_matrix[x][y].was_updated = true;
                 continue;
             }
-            pixel_matrix[y][x].was_updated = true;
+            pixel_matrix[x][y].was_updated = true;
         }
     }
 
-    for (int y = 0; y < window_size.y / PIXEL_SIZE; ++y)
-    {
-        for (int x = 0; x < window_size.x / PIXEL_SIZE; ++x)
-        {
-            pixel_matrix[y][x].was_updated = false;
-        }
-    }
+    for (int x = 0; x < pixel_matrix_size.x; ++x)
+        for (int y = 0; y < pixel_matrix_size.y; ++y)
+            pixel_matrix[x][y].was_updated = false;
 }
 
 
@@ -397,9 +352,8 @@ SDL_AppResult World::redrawWorld()
     if (window_size != current_window_size)
     {
         // Update pixel_matrix, window_size and texture to match actual window size
-        Vector2 old_window_size = window_size;
         window_size = current_window_size;
-        resizePixelMatrix(old_window_size);
+        resizePixelMatrix();
         texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING
                                   , window_size.x, window_size.y);
         if (!texture) {
@@ -410,8 +364,11 @@ SDL_AppResult World::redrawWorld()
 
     recalcWorld();
 
-    if (mouse_is_down) {
-        addPixel();
+    if (mouse_is_down)
+    {
+        float x, y;
+        SDL_GetMouseState(&x, &y);
+        addPixel(Vector2 { (int) x, (int) y });
     }
 
     // Redraw pixel_map on the screen
@@ -426,11 +383,11 @@ SDL_AppResult World::redrawWorld()
 
         // Draw all pixels from pixel_matrix
         SDL_Rect r;
-        for (int y = 0; y < window_size.y / PIXEL_SIZE; ++y)
+        for (int x = 0; x < pixel_matrix_size.x; ++x)
         {
-            for (int x = 0; x < window_size.x / PIXEL_SIZE; ++x)
+            for (int y = 0; y < pixel_matrix_size.y; ++y)
             {
-                Pixel current_pixel = pixel_matrix[y][x];
+                Pixel current_pixel = pixel_matrix[x][y];
                 r.w = r.h = PIXEL_SIZE;
                 r.x = x * PIXEL_SIZE;
                 r.y = y * PIXEL_SIZE;
