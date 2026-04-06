@@ -1,4 +1,6 @@
 # Sand
+[![Autotest](https://github.com/infgotoinf/Sand/actions/workflows/autotest.yml/badge.svg)](https://github.com/infgotoinf/Sand/actions/workflows/autotest.yml)
+
 [About](https://github.com/infgotoinf/Sand/wiki/About)
 [Build](https://github.com/infgotoinf/Sand/wiki/Build)
 [Code documentation](https://infgotoinf.github.io/Sand/)
