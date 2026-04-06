@@ -10,11 +10,12 @@ libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev libthai-dev \
 libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev \
 doxygen graphviz plantuml default-jdk
 
-COPY . /sand/
-WORKDIR /sand
+COPY . /game/
+WORKDIR /game
 
 RUN export CMAKE_GENERATOR=Ninja
-RUN cmake -B build -DBUILD_TESTING=ON
-RUN cmake --build build
+# RUN cmake -B build -DBUILD_TESTING=ON
+# RUN cmake --build build
 
-CMD ["build/Debug/game_test", "-d", "yes"]
+# CMD ["build/Debug/game_test", "-d", "yes"]
+CMD ["/use/bin/bash"]
