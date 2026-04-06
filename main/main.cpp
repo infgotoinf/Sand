@@ -98,5 +98,6 @@ void SDL_AppQuit(void *appstate, SDL_AppResult result)
 /// @ref classes.cpp main.cpp classes.hpp
 /// @subsection github_sec Github
 /// https://github.com/infgotoinf/Sand \n
-/// https://github.com/infgotoinf/Sand/wiki/О-проекте#основная-информация
+/// https://github.com/infgotoinf/Sand/wiki/About \n
+/// https://github.com/infgotoinf/Sand/wiki/Build
 ///////////////////////////////////////////////////////////////////////////////
