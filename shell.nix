@@ -42,8 +42,6 @@ pkgs.mkShell {
     libXext
     libXi
     udev
-
-    SDL2
   ]);
 
   shellHook = ''

@@ -90,7 +90,6 @@ protected:
     TTF_TextEngine *text_renderer; ///< TTF engine what is tied to World::renderer to easly render text.
     SDL_Texture *texture; ///< SDL texture.
     TTF_Font *font; ///< Fonts that are used for the text on the screen.
-    const char* font_path; //< Path to used fonts.
     Pixel **pixel_matrix; ///< Dynamicaly sized Pixel matrix what contains all phical object pixels.
     Vector2 pixel_matrix_size; ///< Size of pixel_matrix
     Vector2 window_size; ///< Window width and height in pixels devided by PIXEL_SIZE.
@@ -257,7 +256,7 @@ public:
     /// @returns SDL_APP_CONTINUE on success
     /// @returns SDL_APP_FAILURE on error
     ///////////////////////////////////////////////////////////////////////////
-    SDL_AppResult initWorld();
+    SDL_AppResult initSDL();
 
     ///////////////////////////////////////////////////////////////////////////
     /// Redraws pixels on the screen, calls recalcWorld() and addPixel().

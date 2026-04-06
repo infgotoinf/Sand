@@ -1,0 +1,11 @@
+build
+docs
+.cache
+.gdb_history
+
+.git
+.gitignore
+.gitmodules
+
+README.md
+Dockerfile
