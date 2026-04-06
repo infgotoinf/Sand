@@ -57,6 +57,12 @@ add_executable(game WIN32
 # Link to the actual SDL3 library.
 target_link_libraries(game PRIVATE include_headers SDL3::SDL3 SDL3_ttf::SDL3_ttf)
 
+add_custom_command(
+  TARGET game POST_BUILD
+  COMMAND
+    ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/vendored/UnifontExMono.ttf
+    $<TARGET_FILE_DIR:game>/vendored/UnifontExMono.ttf
+)
 
 # For testing
 if (BUILD_TESTING)
