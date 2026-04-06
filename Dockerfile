@@ -17,4 +17,4 @@ RUN export CMAKE_GENERATOR=Ninja
 RUN cmake -B build -DBUILD_TESTING=ON
 RUN cmake --build build
 
-CMD ["build/Debug/game_test -d yes"]
+CMD ["build/Debug/game_test", "-d", "yes"]
