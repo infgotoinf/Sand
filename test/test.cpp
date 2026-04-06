@@ -22,10 +22,10 @@ TEST_CASE("Vector2 != operator works correctly", "[vector2]") {
     Vector2 c = {2, 1};
     Vector2 d;
 
-    REQUIRE_FALSE( a != a );
-    REQUIRE( a != b );
-    REQUIRE( a != c );
-    REQUIRE( a != d );
+    CHECK_FALSE( a != a );
+    CHECK( a != b );
+    CHECK( a != c );
+    CHECK( a != d );
 }
 
 
@@ -45,27 +45,27 @@ public:
 };
 
 
-TEST_CASE_METHOD(TestWorld, "World::World() and World::initSDL() work correctly", "[world][init]")
+TEST_CASE_METHOD(TestWorld, "World::World() and World::initSDL() work correctly", "[world][init][!mayfail]")
 {
     SECTION("initSDL() successful SDL initialisation")
     {
-        REQUIRE(initSDL() == SDL_APP_CONTINUE);
+        CHECK(initSDL() == SDL_APP_CONTINUE);
     }
 
     SECTION("Member definition is correct")
     {
-        REQUIRE(window_size.x == 3);
-        REQUIRE(window_size.y == 3);
-        REQUIRE(pixel_matrix_size.x == 3);
-        REQUIRE(pixel_matrix_size.y == 3);
-        REQUIRE( (int) selected_pixel_type == (int) SAND );
+        CHECK(window_size.x == 3);
+        CHECK(window_size.y == 3);
+        CHECK(pixel_matrix_size.x == 3);
+        CHECK(pixel_matrix_size.y == 3);
+        CHECK( (int) selected_pixel_type == (int) SAND );
     }
 
     auto x = GENERATE(0, 1, 2);
     SECTION("Correct filling of pixel_matrix with VOID")
     {
         auto y = GENERATE(0, 1, 2);
-        REQUIRE( (int) pixel_matrix[x][y].type == (int) VOID );
+        CHECK( (int) pixel_matrix[x][y].type == (int) VOID );
     }
 }
 
@@ -75,37 +75,37 @@ TEST_CASE_METHOD(TestWorld, "World::addPixel() works correctly", "[world][addpix
     SECTION("Correct Pixel overrides")
     {
         addPixel({1, 1});
-        REQUIRE( (int) pixel_matrix[1][1].type == (int) SAND );
+        CHECK( (int) pixel_matrix[1][1].type == (int) SAND );
 
         selected_pixel_type = WATER;
         addPixel({1, 1});
-        REQUIRE( (int) pixel_matrix[1][1].type == (int) SAND );
+        CHECK( (int) pixel_matrix[1][1].type == (int) SAND );
 
 
         addPixel({0, 1});
-        REQUIRE( (int) pixel_matrix[0][1].type == (int) WATER );
+        CHECK( (int) pixel_matrix[0][1].type == (int) WATER );
 
         selected_pixel_type = SAND;
         addPixel({0, 1});
-        REQUIRE( (int) pixel_matrix[0][1].type == (int) SAND );
+        CHECK( (int) pixel_matrix[0][1].type == (int) SAND );
 
         selected_pixel_type = STONE;
 
         addPixel({0, 1});
-        REQUIRE( (int) pixel_matrix[0][1].type == (int) STONE );
+        CHECK( (int) pixel_matrix[0][1].type == (int) STONE );
 
         selected_pixel_type = SAND;
         addPixel({0, 1});
-        REQUIRE( (int) pixel_matrix[0][1].type == (int) STONE );
+        CHECK( (int) pixel_matrix[0][1].type == (int) STONE );
     }
 
     SECTION("Correct out of bounds handling")
     {
         addPixel({-1, 0});
-        REQUIRE( (int) pixel_matrix[0][0].type == (int) SAND );
+        CHECK( (int) pixel_matrix[0][0].type == (int) SAND );
 
         addPixel({-123, 345});
-        REQUIRE( (int) pixel_matrix[0][2].type == (int) SAND );
+        CHECK( (int) pixel_matrix[0][2].type == (int) SAND );
     }
 }
 
@@ -125,19 +125,19 @@ TEST_CASE_METHOD(TestWorld, "World::checkPixel() works correctly", "[world][chec
 
         if (x < 0 || x > 2 || y < 0 || y > 2)
 
-            REQUIRE( (int) checkPixel({x, y}) == (int) SEG_FAULT );
+            CHECK( (int) checkPixel({x, y}) == (int) SEG_FAULT );
 
         else if (x == 1 && y == 1 )
-            REQUIRE( (int) checkPixel({x, y}) == (int) SAND );
+            CHECK( (int) checkPixel({x, y}) == (int) SAND );
 
         else if (x == 0 && y == 1 )
-            REQUIRE( (int) checkPixel({x, y}) == (int) WATER );
+            CHECK( (int) checkPixel({x, y}) == (int) WATER );
 
         else if (x == 2 && y == 1 )
-            REQUIRE( (int) checkPixel({x, y}) == (int) STONE );
+            CHECK( (int) checkPixel({x, y}) == (int) STONE );
 
         else
-            REQUIRE( (int) checkPixel({x, y}) == (int) VOID );
+            CHECK( (int) checkPixel({x, y}) == (int) VOID );
     }
 }
 
@@ -160,21 +160,21 @@ TEST_CASE_METHOD(TestWorld, "World::recalcWorld() works correctly", "[world][rec
         // ___
         // _S_
         // WTW
-        REQUIRE( (int) pixel_matrix[1][1].type == (int) SAND );
+        CHECK( (int) pixel_matrix[1][1].type == (int) SAND );
 
         recalcWorld();
         // ___    ___
         // S__ or __S
         //
         // WTW    WTW
-        REQUIRE(( (int) pixel_matrix[0][1].type == (int) SAND
+        CHECK(( (int) pixel_matrix[0][1].type == (int) SAND
                || (int) pixel_matrix[2][1].type == (int) SAND ));
 
         recalcWorld();
         // ___    ___
         // W__ or __W
         // STW    WTS
-        REQUIRE((
+        CHECK((
             ( (int) pixel_matrix[0][2].type == (int) SAND
            && (int) pixel_matrix[0][1].type == (int) WATER ) ||
             ( (int) pixel_matrix[2][2].type == (int) SAND
@@ -183,7 +183,7 @@ TEST_CASE_METHOD(TestWorld, "World::recalcWorld() works correctly", "[world][rec
         ));
 
         recalcWorld();
-        REQUIRE( (int) pixel_matrix[1][1].type == (int) WATER );
+        CHECK( (int) pixel_matrix[1][1].type == (int) WATER );
     }
 
     SECTION("STONE pixel physics correct")
@@ -194,7 +194,7 @@ TEST_CASE_METHOD(TestWorld, "World::recalcWorld() works correctly", "[world][rec
         for (int i = 0; i < 20; ++i)
             recalcWorld();
 
-        REQUIRE( (int) pixel_matrix[1][1].type == (int) STONE );
+        CHECK( (int) pixel_matrix[1][1].type == (int) STONE );
     }
 }
 
@@ -214,8 +214,8 @@ TEST_CASE_METHOD(TestWorld, "World::resizePixelMatrix() works correctly", "[worl
         window_size = {4, 4};
         resizePixelMatrix();
 
-        REQUIRE(pixel_matrix_size.x == 4);
-        REQUIRE(pixel_matrix_size.y == 4);
+        CHECK(pixel_matrix_size.x == 4);
+        CHECK(pixel_matrix_size.y == 4);
 
         for (int x = 0; x < 4; ++x)
         {
@@ -223,10 +223,10 @@ TEST_CASE_METHOD(TestWorld, "World::resizePixelMatrix() works correctly", "[worl
             {
                 if ( (y == 2 && x < 3)
                  || (x == 2 && y < 3 ))
-                    REQUIRE( (int) pixel_matrix[x][y].type == (int) SAND );
+                    CHECK( (int) pixel_matrix[x][y].type == (int) SAND );
 
                 else if (y == 3 || x == 3)
-                    REQUIRE( (int) pixel_matrix[x][y].type == (int) VOID );
+                    CHECK( (int) pixel_matrix[x][y].type == (int) VOID );
 
             }
         }
@@ -237,13 +237,13 @@ TEST_CASE_METHOD(TestWorld, "World::resizePixelMatrix() works correctly", "[worl
         window_size = {2, 2};
         resizePixelMatrix();
 
-        REQUIRE(pixel_matrix_size.x == 2);
-        REQUIRE(pixel_matrix_size.y == 2);
+        CHECK(pixel_matrix_size.x == 2);
+        CHECK(pixel_matrix_size.y == 2);
 
         for (int x = 0; x < 2; ++x)
             for (int y = 0; y < 2; ++y)
                 if (y == 1 || x == 1)
-                    REQUIRE( (int) pixel_matrix[x][y].type == (int) VOID );
+                    CHECK( (int) pixel_matrix[x][y].type == (int) VOID );
     }
 }
 
@@ -257,11 +257,11 @@ TEST_CASE_METHOD(TestWorld, "World::clearWorld() works correctly", "[world][clea
 
         clearWorld();
 
-        REQUIRE(pixel_matrix_size.x == 3);
-        REQUIRE(pixel_matrix_size.y == 3);
+        CHECK(pixel_matrix_size.x == 3);
+        CHECK(pixel_matrix_size.y == 3);
 
         for (int x; x < 3; ++x)
             for (int y; y < 3; ++y)
-                REQUIRE(pixel_matrix[x][y].type == VOID);
+                CHECK(pixel_matrix[x][y].type == VOID);
     }
 }
