@@ -1,0 +1,30 @@
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs: 
+  build-project:
+    runs-on: ubuntu-24.04
+    
+    name: Sand
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: Install Docker
+        run: sudo apt update && sudo apt install -y docker.io docker-cli docker-buildx
+        
+      - name: Prepare Docker Image
+        run: docker build -t sand-image . && docker run -d --rm --name sand-container sand-image sleep infinite
+        
+      - name: Build Inside Docker
+        run: docker exec -i sand-container cmake -B build -DBUILD_TESTING=ON && docker exec -i sand-container cmake --build build
+        
+      - name: Run Tests
+        run: docker exec -i sand-container build/Debug/game_test -d yes
+        
+      - name: Clean
+        if: always()
+        run: docker stop sand-container && docker rmi sand-image
