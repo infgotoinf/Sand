@@ -35,16 +35,25 @@ public:
     {
         window_size = {3, 3};
         selected_pixel_type = SAND;
-        font_path = "vendored/UnifontExMono.ttf";
+
+        // Initialising pixel_matrix
+        pixel_matrix_size = { roundUp((float)window_size.x / PIXEL_SIZE)
+                            , roundUp((float)window_size.y / PIXEL_SIZE) };
+        pixel_matrix = new Pixel*[pixel_matrix_size.x];
+        fillWithVoidPixels(pixel_matrix, pixel_matrix_size);
     }
 };
 
 
-TEST_CASE_METHOD(TestWorld, "World::initWorld() works correctly", "[world][init]")
+TEST_CASE_METHOD(TestWorld, "World::World() and World::initSDL() work correctly", "[world][init]")
 {
+    SECTION("initSDL() successful SDL initialisation")
+    {
+        REQUIRE(initSDL() == SDL_APP_CONTINUE);
+    }
+
     SECTION("Member definition is correct")
     {
-        REQUIRE(initWorld() == SDL_APP_CONTINUE);
         REQUIRE(window_size.x == 3);
         REQUIRE(window_size.y == 3);
         REQUIRE(pixel_matrix_size.x == 3);
@@ -52,7 +61,6 @@ TEST_CASE_METHOD(TestWorld, "World::initWorld() works correctly", "[world][init]
         REQUIRE( (int) selected_pixel_type == (int) SAND );
     }
 
-    initWorld();
     auto x = GENERATE(0, 1, 2);
     SECTION("Correct filling of pixel_matrix with VOID")
     {
@@ -64,7 +72,6 @@ TEST_CASE_METHOD(TestWorld, "World::initWorld() works correctly", "[world][init]
 
 TEST_CASE_METHOD(TestWorld, "World::addPixel() works correctly", "[world][addpixel]")
 {
-    initWorld();
     SECTION("Correct Pixel overrides")
     {
         addPixel({1, 1});
@@ -83,6 +90,7 @@ TEST_CASE_METHOD(TestWorld, "World::addPixel() works correctly", "[world][addpix
         REQUIRE( (int) pixel_matrix[0][1].type == (int) SAND );
 
         selected_pixel_type = STONE;
+
         addPixel({0, 1});
         REQUIRE( (int) pixel_matrix[0][1].type == (int) STONE );
 
@@ -104,7 +112,6 @@ TEST_CASE_METHOD(TestWorld, "World::addPixel() works correctly", "[world][addpix
 
 TEST_CASE_METHOD(TestWorld, "World::checkPixel() works correctly", "[world][checkpixel]")
 {
-    initWorld();
     addPixel({1, 1});
     selected_pixel_type = WATER;
     addPixel({0, 1});
@@ -117,6 +124,7 @@ TEST_CASE_METHOD(TestWorld, "World::checkPixel() works correctly", "[world][chec
         auto y = GENERATE(-1, 0, 1, 2, 3);
 
         if (x < 0 || x > 2 || y < 0 || y > 2)
+
             REQUIRE( (int) checkPixel({x, y}) == (int) SEG_FAULT );
 
         else if (x == 1 && y == 1 )
@@ -138,7 +146,6 @@ TEST_CASE_METHOD(TestWorld, "World::recalcWorld() works correctly", "[world][rec
 {
     SECTION("SAND and WATER pixel physics correct")
     {
-        initWorld();
         // _S_
         // ___
         // WTW
@@ -158,6 +165,7 @@ TEST_CASE_METHOD(TestWorld, "World::recalcWorld() works correctly", "[world][rec
         recalcWorld();
         // ___    ___
         // S__ or __S
+        //
         // WTW    WTW
         REQUIRE(( (int) pixel_matrix[0][1].type == (int) SAND
                || (int) pixel_matrix[2][1].type == (int) SAND ));
@@ -170,6 +178,7 @@ TEST_CASE_METHOD(TestWorld, "World::recalcWorld() works correctly", "[world][rec
             ( (int) pixel_matrix[0][2].type == (int) SAND
            && (int) pixel_matrix[0][1].type == (int) WATER ) ||
             ( (int) pixel_matrix[2][2].type == (int) SAND
+
            && (int) pixel_matrix[2][1].type == (int) WATER )
         ));
 
@@ -179,7 +188,6 @@ TEST_CASE_METHOD(TestWorld, "World::recalcWorld() works correctly", "[world][rec
 
     SECTION("STONE pixel physics correct")
     {
-        initWorld();
         selected_pixel_type = STONE;
         addPixel({1, 1});
 
@@ -192,7 +200,6 @@ TEST_CASE_METHOD(TestWorld, "World::recalcWorld() works correctly", "[world][rec
 
 TEST_CASE_METHOD(TestWorld, "World::resizePixelMatrix() works correctly", "[world][resizepixelmatrix]")
 {
-    initWorld();
     // __S
     // __S
     // SSS
@@ -220,6 +227,7 @@ TEST_CASE_METHOD(TestWorld, "World::resizePixelMatrix() works correctly", "[worl
 
                 else if (y == 3 || x == 3)
                     REQUIRE( (int) pixel_matrix[x][y].type == (int) VOID );
+
             }
         }
     }
@@ -241,7 +249,6 @@ TEST_CASE_METHOD(TestWorld, "World::resizePixelMatrix() works correctly", "[worl
 
 TEST_CASE_METHOD(TestWorld, "World::clearWorld() works correctly", "[world][clearWorld]")
 {
-    initWorld();
     SECTION("Works correct")
     {
         for (int x; x < 3; ++x)

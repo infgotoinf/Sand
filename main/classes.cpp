@@ -23,22 +23,9 @@
 
 
 
-World::World()
+int roundUp(float num)
 {
-    window_size = {640, 480};
-    selected_pixel_type = SAND;
-    font_path = "vendored/UnifontExMono.ttf";
-}
-
-
-World::~World()
-{
-    for (int i = 0; i < pixel_matrix_size.x; ++i)
-        delete [] pixel_matrix[i];
-
-    delete [] pixel_matrix;
-    SDL_DestroyTexture(texture);
-    TTF_Quit();
+    return (num > (int) num ? (int) num + 1 : (int) num);
 }
 
 
@@ -57,13 +44,31 @@ void fillWithVoidPixels(Pixel **pixel_matrix, Vector2 pixel_matrix_size)
 }
 
 
-int roundUp(float num)
+World::World()
 {
-    return (num > (int) num ? (int) num + 1 : (int) num);
+    window_size = {640, 480};
+    selected_pixel_type = SAND;
+
+    // Initialising pixel_matrix
+    pixel_matrix_size = { roundUp((float)window_size.x / PIXEL_SIZE)
+                        , roundUp((float)window_size.y / PIXEL_SIZE) };
+    pixel_matrix = new Pixel*[pixel_matrix_size.x];
+    fillWithVoidPixels(pixel_matrix, pixel_matrix_size);
 }
 
 
-SDL_AppResult World::initWorld()
+World::~World()
+{
+    for (int i = 0; i < pixel_matrix_size.x; ++i)
+        delete [] pixel_matrix[i];
+
+    delete [] pixel_matrix;
+    SDL_DestroyTexture(texture);
+    TTF_Quit();
+}
+
+
+SDL_AppResult World::initSDL()
 {
     SDL_SetAppMetadata("Sand the sandbox", "1.2", NULL);
 
@@ -98,18 +103,12 @@ SDL_AppResult World::initWorld()
         return SDL_APP_FAILURE;
     }
 
-    font = TTF_OpenFont(font_path, TEXT_SIZE * 2);
+    font = TTF_OpenFont("vendored/UnifontExMono.ttf", TEXT_SIZE * 2);
     if (!font) {
         SDL_Log("Couldn't load font: %s", SDL_GetError());
         TTF_Quit();
         return SDL_APP_FAILURE;
     }
-
-    // Initialising pixel_matrix
-    pixel_matrix_size = { roundUp((float)window_size.x / PIXEL_SIZE)
-                        , roundUp((float)window_size.y / PIXEL_SIZE) };
-    pixel_matrix = new Pixel*[pixel_matrix_size.x];
-    fillWithVoidPixels(pixel_matrix, pixel_matrix_size);
 
     return SDL_APP_CONTINUE;  /* carry on with the program! */
 }

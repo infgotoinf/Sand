@@ -23,11 +23,11 @@ static World* world = World::getIstance(); ///< World class instance
 
 
 ///////////////////////////////////////////////////////////////////////////////
-/// This function runs once at startup. Calls World::initWorld().
+/// This function runs once at startup. Calls World::initSDL().
 ///////////////////////////////////////////////////////////////////////////////
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 {
-    return world->initWorld();
+    return world->initSDL();
 }
 
 
