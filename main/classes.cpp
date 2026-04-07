@@ -118,10 +118,6 @@ void World::addPixel(Vector2 mouse_pos)
 {
     SDL_Color color;
     switch (selected_pixel_type) {
-    case SAND:
-        color = SAND_COLOR;
-        break;
-
     case WATER:
         color = WATER_COLOR;
         break;
@@ -403,7 +399,7 @@ SDL_AppResult World::redrawWorld()
     SDL_RenderTexture(renderer, texture, NULL, &dst_rect);
 
     // Text rendering
-    static const char* text =
+    constexpr static const char* text =
 R"(LMB - to start drawing pixels
 1 - to select Sand
 2 - to select Water

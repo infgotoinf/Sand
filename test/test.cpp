@@ -251,8 +251,8 @@ TEST_CASE_METHOD(TestWorld, "World::clearWorld() works correctly", "[world][clea
 {
     SECTION("Works correct")
     {
-        for (int x; x < 3; ++x)
-            for (int y; y < 3; ++y)
+        for (int x = 0; x < 3; ++x)
+            for (int y = 0; y < 3; ++y)
                 addPixel({x, y});
 
         clearWorld();
@@ -260,8 +260,8 @@ TEST_CASE_METHOD(TestWorld, "World::clearWorld() works correctly", "[world][clea
         CHECK(pixel_matrix_size.x == 3);
         CHECK(pixel_matrix_size.y == 3);
 
-        for (int x; x < 3; ++x)
-            for (int y; y < 3; ++y)
+        for (int x = 0; x < 3; ++x)
+            for (int y = 0; y < 3; ++y)
                 CHECK(pixel_matrix[x][y].type == VOID);
     }
 }
