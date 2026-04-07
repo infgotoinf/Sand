@@ -6,7 +6,10 @@
 [Code documentation](https://infgotoinf.github.io/Sand/)
 [Releases](https://github.com/infgotoinf/Sand/releases)
 
-<img width="952" height="513" alt="image" src="https://github.com/user-attachments/assets/4eca70f7-9821-456d-b3ea-72435bc61115" />
+<p align="center">
+  <img width="904" height="730" alt="image" src="https://github.com/user-attachments/assets/cc72c7c8-629c-4edf-9bc1-50d65f1ebb08" />
+
+</p>
 
 ## About
 Sand is a simple Sandbox game that simulates physical materials/objects such as water and sand and renders them on the screen as pixels.
