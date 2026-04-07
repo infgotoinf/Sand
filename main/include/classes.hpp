@@ -31,6 +31,7 @@ enum PixelType : uint8_t
     ,SAND
     ,WATER
     ,STONE
+    ,LAVA
 };
 
 
@@ -93,12 +94,17 @@ protected:
     Pixel **pixel_matrix; ///< Dynamicaly sized Pixel matrix what contains all phical object pixels.
     Vector2 pixel_matrix_size; ///< Size of pixel_matrix
     Vector2 window_size; ///< Window width and height in pixels devided by PIXEL_SIZE.
+    int pixel_size; ///< Defines how bigger pixels will be than screen pixels.
 
     ///////////////////////////////////////////////////////////////////////////
     /// Class constructor, here we define World::selected_pixel_type and
     /// window_size.
     ///////////////////////////////////////////////////////////////////////////
     World();
+
+    ///////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
+    void calcPixelMatrixSize();
 
     ///////////////////////////////////////////////////////////////////////////
     /// Checks if position on the screen is avalible for movement.

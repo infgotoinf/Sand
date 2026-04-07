@@ -28,6 +28,18 @@ int roundUp(float num)
     return (num > (int) num ? (int) num + 1 : (int) num);
 }
 
+void World::calcPixelMatrixSize()
+{
+    pixel_size = 1;
+    unsigned number_of_pixels = window_size.x * window_size.y;
+    while (number_of_pixels > MAX_PIXEL_MATRIX_SIZE)
+    {
+        ++pixel_size;
+        number_of_pixels = roundUp((float) window_size.x / pixel_size) * roundUp((float)window_size.y / pixel_size);
+    }
+    pixel_matrix_size = { roundUp((float) window_size.x / pixel_size)
+                        , roundUp((float) window_size.y / pixel_size) };
+}
 
 void fillWithVoidPixels(Pixel **pixel_matrix, Vector2 pixel_matrix_size)
 {
@@ -50,8 +62,7 @@ World::World()
     selected_pixel_type = SAND;
 
     // Initialising pixel_matrix
-    pixel_matrix_size = { roundUp((float)window_size.x / PIXEL_SIZE)
-                        , roundUp((float)window_size.y / PIXEL_SIZE) };
+    calcPixelMatrixSize();
     pixel_matrix = new Pixel*[pixel_matrix_size.x];
     fillWithVoidPixels(pixel_matrix, pixel_matrix_size);
 }
@@ -118,6 +129,10 @@ void World::addPixel(Vector2 mouse_pos)
 {
     SDL_Color color;
     switch (selected_pixel_type) {
+    case VOID:
+        color = BG_COLOR;
+        break;
+
     case WATER:
         color = WATER_COLOR;
         break;
@@ -126,14 +141,18 @@ void World::addPixel(Vector2 mouse_pos)
         color = STONE_COLOR;
         break;
 
+    case LAVA:
+        color = LAVA_COLOR;
+        break;
+
     default:
         color = SAND_COLOR;
     }
 
     for (int i = 0; i < BRUSH_DENCITY; ++i)
     {
-        Vector2 pixel_spawn_coord = { (int)mouse_pos.x / PIXEL_SIZE + (SDL_rand(BRUSH_SPREAD) * (SDL_rand(2) ? -1 : 1))
-                                    , (int)mouse_pos.y / PIXEL_SIZE + (SDL_rand(BRUSH_SPREAD) * (SDL_rand(2) ? -1 : 1))};
+        Vector2 pixel_spawn_coord = { (int)mouse_pos.x / pixel_size + (SDL_rand(BRUSH_SPREAD) * (SDL_rand(2) ? -1 : 1))
+                                    , (int)mouse_pos.y / pixel_size + (SDL_rand(BRUSH_SPREAD) * (SDL_rand(2) ? -1 : 1))};
 
         // Fix pixel_spawn_coord if it's off the screen
         if (pixel_spawn_coord.x > pixel_matrix_size.x - 1) pixel_spawn_coord.x = pixel_matrix_size.x - 1;
@@ -167,10 +186,7 @@ void World::addPixel(Vector2 mouse_pos)
             break;
 
         default:
-            if (pixel_matrix[pixel_spawn_coord.x][pixel_spawn_coord.y].type == VOID)
-            {
-                pixel_matrix[pixel_spawn_coord.x][pixel_spawn_coord.y] = { color, selected_pixel_type, false };
-            }
+            pixel_matrix[pixel_spawn_coord.x][pixel_spawn_coord.y] = { color, selected_pixel_type, false };
         }
     }
 }
@@ -180,9 +196,7 @@ void World::resizePixelMatrix()
 {
     Vector2 old_pixel_matrix_size = pixel_matrix_size;
 
-    pixel_matrix_size = { roundUp((float)window_size.x / PIXEL_SIZE)
-                        , roundUp((float)window_size.y / PIXEL_SIZE) };
-
+    calcPixelMatrixSize();
     Pixel **new_pixel_matrix = new Pixel*[pixel_matrix_size.x];
 
     Vector2 common_pixel_matrix_size = { std::min(old_pixel_matrix_size.x, pixel_matrix_size.x)
@@ -205,7 +219,7 @@ void World::resizePixelMatrix()
 
     delete [] pixel_matrix;
 
-    pixel_matrix = std::move(new_pixel_matrix);
+    std::swap(pixel_matrix, new_pixel_matrix);
 }
 
 
@@ -383,9 +397,9 @@ SDL_AppResult World::redrawWorld()
             for (int y = 0; y < pixel_matrix_size.y; ++y)
             {
                 Pixel current_pixel = pixel_matrix[x][y];
-                r.w = r.h = PIXEL_SIZE;
-                r.x = x * PIXEL_SIZE;
-                r.y = y * PIXEL_SIZE;
+                r.w = r.h = pixel_size;
+                r.x = x * pixel_size;
+                r.y = y * pixel_size;
                 SDL_FillSurfaceRect(surface, &r, SDL_MapRGB(SDL_GetPixelFormatDetails(surface->format), NULL
                                    , current_pixel.color.r, current_pixel.color.g, current_pixel.color.b));
             }
@@ -404,7 +418,10 @@ R"(LMB - to start drawing pixels
 1 - to select Sand
 2 - to select Water
 3 - to select Stone
-0 - to clean the screen)";
+4 - to select Lava
+0 - to select Eraser
+Backspace - to clean the screen
+)";
 
     static TTF_Text* text_text = TTF_CreateText(text_renderer, font, text, 0);
     TTF_DrawRendererText(text_text, TEXT_SIZE, TEXT_SIZE);

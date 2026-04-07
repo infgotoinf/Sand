@@ -2,7 +2,7 @@
 #include <catch2/catch_all.hpp>
 
 #define CONFIG_HPP
-#define PIXEL_SIZE 1
+#define MAX_PIXEL_MATRIX_SIZE 1000
 #define BRUSH_SPREAD 0
 #define BRUSH_DENCITY 1
 #define BG_COLOR (SDL_Color) { (Uint8) (0) \
@@ -12,6 +12,7 @@
 #define SAND_COLOR BG_COLOR
 #define WATER_COLOR BG_COLOR
 #define STONE_COLOR BG_COLOR
+#define LAVA_COLOR BG_COLOR
 #define TEXT_SIZE 1
 #include "../main/classes.cpp"
 
@@ -37,8 +38,7 @@ public:
         selected_pixel_type = SAND;
 
         // Initialising pixel_matrix
-        pixel_matrix_size = { roundUp((float)window_size.x / PIXEL_SIZE)
-                            , roundUp((float)window_size.y / PIXEL_SIZE) };
+        calcPixelMatrixSize();
         pixel_matrix = new Pixel*[pixel_matrix_size.x];
         fillWithVoidPixels(pixel_matrix, pixel_matrix_size);
     }
@@ -81,7 +81,6 @@ TEST_CASE_METHOD(TestWorld, "World::addPixel() works correctly", "[world][addpix
         addPixel({1, 1});
         CHECK( (int) pixel_matrix[1][1].type == (int) SAND );
 
-
         addPixel({0, 1});
         CHECK( (int) pixel_matrix[0][1].type == (int) WATER );
 
@@ -90,7 +89,6 @@ TEST_CASE_METHOD(TestWorld, "World::addPixel() works correctly", "[world][addpix
         CHECK( (int) pixel_matrix[0][1].type == (int) SAND );
 
         selected_pixel_type = STONE;
-
         addPixel({0, 1});
         CHECK( (int) pixel_matrix[0][1].type == (int) STONE );
 
@@ -168,7 +166,7 @@ TEST_CASE_METHOD(TestWorld, "World::recalcWorld() works correctly", "[world][rec
         //
         // WTW    WTW
         CHECK(( (int) pixel_matrix[0][1].type == (int) SAND
-               || (int) pixel_matrix[2][1].type == (int) SAND ));
+             || (int) pixel_matrix[2][1].type == (int) SAND ));
 
         recalcWorld();
         // ___    ___
@@ -178,7 +176,6 @@ TEST_CASE_METHOD(TestWorld, "World::recalcWorld() works correctly", "[world][rec
             ( (int) pixel_matrix[0][2].type == (int) SAND
            && (int) pixel_matrix[0][1].type == (int) WATER ) ||
             ( (int) pixel_matrix[2][2].type == (int) SAND
-
            && (int) pixel_matrix[2][1].type == (int) WATER )
         ));
 
@@ -262,6 +259,6 @@ TEST_CASE_METHOD(TestWorld, "World::clearWorld() works correctly", "[world][clea
 
         for (int x = 0; x < 3; ++x)
             for (int y = 0; y < 3; ++y)
-                CHECK(pixel_matrix[x][y].type == VOID);
+                CHECK( (int) pixel_matrix[x][y].type == (int) VOID);
     }
 }
