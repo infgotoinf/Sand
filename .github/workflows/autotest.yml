@@ -18,15 +18,9 @@ jobs:
           submodules: 'recursive'
 
       - name: Install Docker
-<<<<<<< HEAD
         run: sudo apt-get update
-        
-      - name: Prepare Docker Image
-=======
-        run: sudo apt-get update && sudo apt install -y docker-cli docker-buildx
 
-      - name: Prepare Docker image
->>>>>>> 9bad0a8 (Add Eraser and start implementation of Lava, fix so pixel_size changes depending on window size.)
+      - name: Prepare Docker Image
         run: docker build -t sand-image . && docker run -d -it --rm --name sand-container sand-image sleep infinity
 
       - name: Generate game's build config from Docker image
