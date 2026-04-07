@@ -18,7 +18,7 @@ jobs:
           submodules: 'recursive'
         
       - name: Install Docker
-        run: sudo apt-get update && sudo apt install -y docker-cli docker-buildx
+        run: sudo apt-get update
         
       - name: Prepare Docker Image
         run: docker build -t sand-image . && docker run -d -it --rm --name sand-container sand-image sleep infinity
