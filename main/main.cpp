@@ -64,6 +64,14 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
             world->selected_pixel_type = LAVA;
         if (event->key.key == SDLK_0)
             world->selected_pixel_type = VOID;
+
+        if (event->key.key == SDLK_MINUS && world->brush_spread > 1)
+            world->brush_spread--;
+        if (event->key.key == SDLK_EQUALS)
+            world->brush_spread++;
+
+        if (event->key.key == SDLK_RETURN)
+            world->hide_guide = !world->hide_guide;
         if (event->key.key == SDLK_BACKSPACE)
             world->clearWorld();
 

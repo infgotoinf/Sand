@@ -3,7 +3,6 @@
 
 #define CONFIG_HPP
 #define MAX_PIXEL_MATRIX_SIZE 1000
-#define BRUSH_SPREAD 0
 #define BRUSH_DENCITY 1
 #define BG_COLOR (SDL_Color) { (Uint8) (0) \
                              , (Uint8) (0) \
@@ -36,6 +35,7 @@ public:
     {
         window_size = {3, 3};
         selected_pixel_type = SAND;
+        brush_spread = 1;
 
         // Initialising pixel_matrix
         calcPixelMatrixSize();

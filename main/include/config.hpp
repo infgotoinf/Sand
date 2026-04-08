@@ -14,11 +14,8 @@
 
 #define MAX_PIXEL_MATRIX_SIZE 100000
 
-/// Defines how off the mouse cursor's coordinates pixels can spawn.
-#define BRUSH_SPREAD 7
-
 /// Defines how much pixels will me spawned each time World::addPixel() inwoked.
-#define BRUSH_DENCITY (BRUSH_SPREAD * 3)
+#define BRUSH_DENCITY 3
 
 /// Defines with how off the default color pixel color can be.
 #define COLOR_SPREAD 100
