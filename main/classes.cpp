@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <utility>
+#include <string>
 
 #include "include/config.hpp"
 
@@ -60,6 +61,8 @@ World::World()
 {
     window_size = {640, 480};
     selected_pixel_type = SAND;
+    brush_spread = 10;
+    hide_guide = false;
 
     // Initialising pixel_matrix
     calcPixelMatrixSize();
@@ -127,10 +130,10 @@ SDL_AppResult World::initSDL()
 
 void World::addPixel(Vector2 mouse_pos)
 {
-    for (int i = 0; i < BRUSH_DENCITY; ++i)
+    for (int i = 0; i < brush_spread * BRUSH_DENCITY; ++i)
     {
-        Vector2 pixel_spawn_coord = { (int)mouse_pos.x / pixel_size + (SDL_rand(BRUSH_SPREAD) * (SDL_rand(2) ? -1 : 1))
-                                    , (int)mouse_pos.y / pixel_size + (SDL_rand(BRUSH_SPREAD) * (SDL_rand(2) ? -1 : 1))};
+        Vector2 pixel_spawn_coord = { (int)mouse_pos.x / pixel_size + (SDL_rand(brush_spread) * (SDL_rand(2) ? -1 : 1))
+                                    , (int)mouse_pos.y / pixel_size + (SDL_rand(brush_spread) * (SDL_rand(2) ? -1 : 1))};
 
         // Fix pixel_spawn_coord if it's off the screen
         if (pixel_spawn_coord.x > pixel_matrix_size.x - 1) pixel_spawn_coord.x = pixel_matrix_size.x - 1;
@@ -141,9 +144,14 @@ void World::addPixel(Vector2 mouse_pos)
 
         // Override pixel logic
         switch (selected_pixel_type) {
+        case VOID:
+            pixel_matrix[pixel_spawn_coord.x][pixel_spawn_coord.y] = { BG_COLOR, selected_pixel_type, false };
+            break;
+
         case SAND:
             if (pixel_matrix[pixel_spawn_coord.x][pixel_spawn_coord.y].type == VOID
-             || pixel_matrix[pixel_spawn_coord.x][pixel_spawn_coord.y].type == WATER)
+             || pixel_matrix[pixel_spawn_coord.x][pixel_spawn_coord.y].type == WATER
+             || pixel_matrix[pixel_spawn_coord.x][pixel_spawn_coord.y].type == LAVA)
             {
                 pixel_matrix[pixel_spawn_coord.x][pixel_spawn_coord.y] = { SAND_COLOR, selected_pixel_type, false };
             }
@@ -468,17 +476,44 @@ SDL_AppResult World::redrawWorld()
     SDL_RenderTexture(renderer, texture, NULL, &dst_rect);
 
     // Text rendering
-    constexpr static const char* text =
-R"(LMB - to start drawing pixels
+    std::string text = "Selected element: ";
+    switch (selected_pixel_type) {
+    case VOID:
+        text += "Erase";
+        break;
+
+    case WATER:
+        text += "Water";
+        break;
+
+    case STONE:
+        text += "Stone";
+        break;
+
+    case LAVA:
+        text += "Lava";
+        break;
+
+    default:
+        text += "Sand";
+    }
+    text += "\nBrush spread: " + std::to_string(brush_spread);
+    text += "\nEnter - show/hide guide";
+    if (!hide_guide)
+        text +=
+R"(
+LMB - to start drawing pixels
 1 - to select Sand
 2 - to select Water
 3 - to select Stone
 4 - to select Lava
 0 - to select Eraser
+- - to make brush spread smaller
+= - to make brush spread bigger
 Backspace - to clean the screen
 )";
 
-    static TTF_Text* text_text = TTF_CreateText(text_renderer, font, text, 0);
+    TTF_Text* text_text = TTF_CreateText(text_renderer, font, text.c_str(), 0);
     TTF_DrawRendererText(text_text, TEXT_SIZE, TEXT_SIZE);
 
 

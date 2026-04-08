@@ -231,6 +231,8 @@ protected:
 public:
     bool mouse_is_down = false; ///< Stores current state of the mouse button, used in redrawWorld() to detect then addPixel() should be inwoked.
     PixelType selected_pixel_type; ///< Currently selected PixelType, used in addPixel().
+    int brush_spread; ///< Defines how off the mouse cursor's coordinates pixels can spawn.
+    bool hide_guide;
 
     ~World();
 
