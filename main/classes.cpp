@@ -28,6 +28,18 @@ int roundUp(float num)
     return (num > (int) num ? (int) num + 1 : (int) num);
 }
 
+void World::calcPixelMatrixSize()
+{
+    pixel_size = 1;
+    unsigned number_of_pixels = window_size.x * window_size.y;
+    while (number_of_pixels > MAX_PIXEL_MATRIX_SIZE)
+    {
+        ++pixel_size;
+        number_of_pixels = roundUp((float) window_size.x / pixel_size) * roundUp((float)window_size.y / pixel_size);
+    }
+    pixel_matrix_size = { roundUp((float) window_size.x / pixel_size)
+                        , roundUp((float) window_size.y / pixel_size) };
+}
 
 void fillWithVoidPixels(Pixel **pixel_matrix, Vector2 pixel_matrix_size)
 {
@@ -50,8 +62,7 @@ World::World()
     selected_pixel_type = SAND;
 
     // Initialising pixel_matrix
-    pixel_matrix_size = { roundUp((float)window_size.x / PIXEL_SIZE)
-                        , roundUp((float)window_size.y / PIXEL_SIZE) };
+    calcPixelMatrixSize();
     pixel_matrix = new Pixel*[pixel_matrix_size.x];
     fillWithVoidPixels(pixel_matrix, pixel_matrix_size);
 }
@@ -116,28 +127,10 @@ SDL_AppResult World::initSDL()
 
 void World::addPixel(Vector2 mouse_pos)
 {
-    SDL_Color color;
-    switch (selected_pixel_type) {
-    case SAND:
-        color = SAND_COLOR;
-        break;
-
-    case WATER:
-        color = WATER_COLOR;
-        break;
-
-    case STONE:
-        color = STONE_COLOR;
-        break;
-
-    default:
-        color = SAND_COLOR;
-    }
-
     for (int i = 0; i < BRUSH_DENCITY; ++i)
     {
-        Vector2 pixel_spawn_coord = { (int)mouse_pos.x / PIXEL_SIZE + (SDL_rand(BRUSH_SPREAD) * (SDL_rand(2) ? -1 : 1))
-                                    , (int)mouse_pos.y / PIXEL_SIZE + (SDL_rand(BRUSH_SPREAD) * (SDL_rand(2) ? -1 : 1))};
+        Vector2 pixel_spawn_coord = { (int)mouse_pos.x / pixel_size + (SDL_rand(BRUSH_SPREAD) * (SDL_rand(2) ? -1 : 1))
+                                    , (int)mouse_pos.y / pixel_size + (SDL_rand(BRUSH_SPREAD) * (SDL_rand(2) ? -1 : 1))};
 
         // Fix pixel_spawn_coord if it's off the screen
         if (pixel_spawn_coord.x > pixel_matrix_size.x - 1) pixel_spawn_coord.x = pixel_matrix_size.x - 1;
@@ -152,29 +145,41 @@ void World::addPixel(Vector2 mouse_pos)
             if (pixel_matrix[pixel_spawn_coord.x][pixel_spawn_coord.y].type == VOID
              || pixel_matrix[pixel_spawn_coord.x][pixel_spawn_coord.y].type == WATER)
             {
-                pixel_matrix[pixel_spawn_coord.x][pixel_spawn_coord.y] = { color, selected_pixel_type, false };
+                pixel_matrix[pixel_spawn_coord.x][pixel_spawn_coord.y] = { SAND_COLOR, selected_pixel_type, false };
             }
             break;
 
         case WATER:
             if (pixel_matrix[pixel_spawn_coord.x][pixel_spawn_coord.y].type == VOID)
             {
-                pixel_matrix[pixel_spawn_coord.x][pixel_spawn_coord.y] = { color, selected_pixel_type, false };
+                pixel_matrix[pixel_spawn_coord.x][pixel_spawn_coord.y] = { WATER_COLOR, selected_pixel_type, false };
+            }
+            else if (pixel_matrix[pixel_spawn_coord.x][pixel_spawn_coord.y].type == LAVA)
+            {
+                pixel_matrix[pixel_spawn_coord.x][pixel_spawn_coord.y] = { STONE_COLOR, STONE, false };
             }
             break;
 
         case STONE:
             if (pixel_matrix[pixel_spawn_coord.x][pixel_spawn_coord.y].type != STONE)
             {
-                pixel_matrix[pixel_spawn_coord.x][pixel_spawn_coord.y] = { color, selected_pixel_type, false };
+                pixel_matrix[pixel_spawn_coord.x][pixel_spawn_coord.y] = { STONE_COLOR, selected_pixel_type, false };
+            }
+            break;
+
+        case LAVA:
+            if (pixel_matrix[pixel_spawn_coord.x][pixel_spawn_coord.y].type == VOID)
+            {
+                pixel_matrix[pixel_spawn_coord.x][pixel_spawn_coord.y] = { LAVA_COLOR, selected_pixel_type, false };
+            }
+            else if (pixel_matrix[pixel_spawn_coord.x][pixel_spawn_coord.y].type == WATER)
+            {
+                pixel_matrix[pixel_spawn_coord.x][pixel_spawn_coord.y] = { STONE_COLOR, STONE, false };
             }
             break;
 
         default:
-            if (pixel_matrix[pixel_spawn_coord.x][pixel_spawn_coord.y].type == VOID)
-            {
-                pixel_matrix[pixel_spawn_coord.x][pixel_spawn_coord.y] = { color, selected_pixel_type, false };
-            }
+            pixel_matrix[pixel_spawn_coord.x][pixel_spawn_coord.y] = { SAND_COLOR, selected_pixel_type, false };
         }
     }
 }
@@ -184,9 +189,7 @@ void World::resizePixelMatrix()
 {
     Vector2 old_pixel_matrix_size = pixel_matrix_size;
 
-    pixel_matrix_size = { roundUp((float)window_size.x / PIXEL_SIZE)
-                        , roundUp((float)window_size.y / PIXEL_SIZE) };
-
+    calcPixelMatrixSize();
     Pixel **new_pixel_matrix = new Pixel*[pixel_matrix_size.x];
 
     Vector2 common_pixel_matrix_size = { std::min(old_pixel_matrix_size.x, pixel_matrix_size.x)
@@ -209,7 +212,7 @@ void World::resizePixelMatrix()
 
     delete [] pixel_matrix;
 
-    pixel_matrix = std::move(new_pixel_matrix);
+    std::swap(pixel_matrix, new_pixel_matrix);
 }
 
 
@@ -266,6 +269,7 @@ void World::recalcWorld()
             const PixelType left  = checkPixel({ x - 1, y });
             const PixelType right = checkPixel({ x + 1, y });
 
+            bool there_is_water_on_top;
             bool can_fall_down;
             bool can_fall_down_right;
             bool can_fall_down_left;
@@ -274,11 +278,11 @@ void World::recalcWorld()
 
             switch(pixel_matrix[x][y].type) {
             case SAND:
-                can_fall_down = (down == VOID || down == WATER);
-                can_fall_down_right = (down_right == VOID || down_right == WATER);
-                can_fall_down_left = (down_left == VOID || down_left == WATER);
-                can_fall_right = (right == VOID || right == WATER);
-                can_fall_left = (left == VOID || left == WATER);
+                can_fall_down = (down == VOID || down == WATER || down == LAVA);
+                can_fall_down_right = (down_right == VOID || down_right == WATER || down_right == LAVA);
+                can_fall_down_left = (down_left == VOID || down_left == WATER || down_left == LAVA);
+                can_fall_right = (right == VOID || right == WATER || right == LAVA);
+                can_fall_left = (left == VOID || left == WATER || left == LAVA);
 
                 if (can_fall_down)
                     std::swap(pixel_matrix[x][y], pixel_matrix[x][y + 1]);
@@ -323,6 +327,67 @@ void World::recalcWorld()
 
                     else if (can_fall_right)
                         std::swap(pixel_matrix[x][y], pixel_matrix[x + 1][y]);
+                }
+                break;
+
+            case LAVA:
+                there_is_water_on_top = (checkPixel({ x, y - 1 }) == WATER);
+                can_fall_down = (down == VOID || down == WATER);
+                can_fall_right = (right == VOID || right == WATER);
+                can_fall_left = (left == VOID || left == WATER);
+
+                if (there_is_water_on_top) {
+                     pixel_matrix[x][y].type = STONE;
+                     pixel_matrix[x][y].color = STONE_COLOR;
+                     pixel_matrix[x][y - 1].type = STONE;
+                     pixel_matrix[x][y - 1].color = STONE_COLOR;
+                }
+                else if (can_fall_down) {
+                    if (down == WATER) {
+                         pixel_matrix[x][y].type = STONE;
+                         pixel_matrix[x][y].color = STONE_COLOR;
+                         pixel_matrix[x][y + 1].type = STONE;
+                         pixel_matrix[x][y + 1].color = STONE_COLOR;
+                    }
+                    else
+                        std::swap(pixel_matrix[x][y], pixel_matrix[x][y + 1]);
+                }
+
+                else
+                {
+                    // if (can_fall_left && can_fall_right) {
+                    //     int rand_shift = (SDL_rand(2) ? 1 : -1);
+                    //     if (pixel_matrix[x + rand_shift][y].type == WATER) {
+                    //          pixel_matrix[x][y].type = STONE;
+                    //          pixel_matrix[x][y].color = STONE_COLOR;
+                    //          pixel_matrix[x + rand_shift][y].type = STONE;
+                    //          pixel_matrix[x + rand_shift][y].color = STONE_COLOR;
+                    //     }
+                    //     else
+                    //         std::swap(pixel_matrix[x][y], pixel_matrix[x + rand_shift][y]);
+                    // }
+
+                    if (can_fall_left) {
+                        if (left == WATER) {
+                             pixel_matrix[x][y].type = STONE;
+                             pixel_matrix[x][y].color = STONE_COLOR;
+                             pixel_matrix[x - 1][y].type = STONE;
+                             pixel_matrix[x - 1][y].color = STONE_COLOR;
+                        }
+                        else
+                            std::swap(pixel_matrix[x][y], pixel_matrix[x - 1][y]);
+                    }
+
+                    else if (can_fall_right) {
+                        if (right == WATER) {
+                             pixel_matrix[x][y].type = STONE;
+                             pixel_matrix[x][y].color = STONE_COLOR;
+                             pixel_matrix[x + 1][y].type = STONE;
+                             pixel_matrix[x + 1][y].color = STONE_COLOR;
+                        }
+                        else
+                            std::swap(pixel_matrix[x][y], pixel_matrix[x + 1][y]);
+                    }
                 }
                 break;
 
@@ -387,9 +452,9 @@ SDL_AppResult World::redrawWorld()
             for (int y = 0; y < pixel_matrix_size.y; ++y)
             {
                 Pixel current_pixel = pixel_matrix[x][y];
-                r.w = r.h = PIXEL_SIZE;
-                r.x = x * PIXEL_SIZE;
-                r.y = y * PIXEL_SIZE;
+                r.w = r.h = pixel_size;
+                r.x = x * pixel_size;
+                r.y = y * pixel_size;
                 SDL_FillSurfaceRect(surface, &r, SDL_MapRGB(SDL_GetPixelFormatDetails(surface->format), NULL
                                    , current_pixel.color.r, current_pixel.color.g, current_pixel.color.b));
             }
@@ -403,12 +468,15 @@ SDL_AppResult World::redrawWorld()
     SDL_RenderTexture(renderer, texture, NULL, &dst_rect);
 
     // Text rendering
-    static const char* text =
+    constexpr static const char* text =
 R"(LMB - to start drawing pixels
 1 - to select Sand
 2 - to select Water
 3 - to select Stone
-0 - to clean the screen)";
+4 - to select Lava
+0 - to select Eraser
+Backspace - to clean the screen
+)";
 
     static TTF_Text* text_text = TTF_CreateText(text_renderer, font, text, 0);
     TTF_DrawRendererText(text_text, TEXT_SIZE, TEXT_SIZE);

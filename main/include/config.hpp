@@ -12,12 +12,10 @@
 #ifndef CONFIG_HPP
 #define CONFIG_HPP
 
-/// Defines pixel size in pixels.
-/// Makes pixel that much bigger than a regular pixel on the screen.
-#define PIXEL_SIZE 4
+#define MAX_PIXEL_MATRIX_SIZE 100000
 
 /// Defines how off the mouse cursor's coordinates pixels can spawn.
-#define BRUSH_SPREAD 5
+#define BRUSH_SPREAD 7
 
 /// Defines how much pixels will me spawned each time World::addPixel() inwoked.
 #define BRUSH_DENCITY (BRUSH_SPREAD * 3)
@@ -45,6 +43,11 @@
                                 , (Uint8) (75 + SDL_rand(COLOR_SPREAD / 2)) \
                                 , (Uint8) (100) \
                                 , (Uint8) (255) }
+
+#define LAVA_COLOR (SDL_Color) { (Uint8) (255) \
+                               , (Uint8) (0 + SDL_rand(COLOR_SPREAD)) \
+                               , (Uint8) (0) \
+                               , (Uint8) (255) }
 
 /// Defines size of the text that is drawn on the screen.
 #define TEXT_SIZE 8

@@ -5,36 +5,33 @@ on:
   pull_request:
     branches: [ "main" ]
 
-jobs: 
+jobs:
   build-project:
     runs-on: ubuntu-24.04
-    
+
     name: Sand
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          submodules: 'recursive' 
+          submodules: 'recursive'
 
-      - name: Uninstall cursed stuff
-        run: sudo apt-get remove -y containerd containerd.io
-        
       - name: Install Docker
-        run: sudo apt-get update && sudo apt install -y docker.io docker-cli docker-buildx
-        
+        run: sudo apt-get update
+
       - name: Prepare Docker Image
         run: docker build -t sand-image . && docker run -d -it --rm --name sand-container sand-image sleep infinity
-      
-      - name: Generate Inside Docker
+
+      - name: Generate game's build config from Docker image
         run: docker exec -i sand-container cmake -B build -DBUILD_TESTING=ON
 
-      - name: Build Inside Docker
+      - name: Build game from Docker image
         run: docker exec -i sand-container cmake --build build
-        
-      - name: Run Tests
+
+      - name: Run tests from Docker image
         run: docker exec -i sand-container build/Debug/game_test -d yes
-        
+
       - name: Clean
         if: always()
         run: docker stop sand-container && docker rmi -f sand-image
